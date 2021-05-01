@@ -1,0 +1,10 @@
+[package]
+name = "terminal-client"
+version = "0.1.0"
+authors = ["snen <seansullygames@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+bojanchess = { path = "../bojanchess" }
+rand = "*"
+termion = "*"

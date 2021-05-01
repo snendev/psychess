@@ -1,0 +1,7 @@
+{
+    "imports": {
+        "http": "https://deno.land/std@0.95.0/http/server.ts",
+        "wasm_chess": "../wasm-chess/pkg/wasm_chess.js",
+        "ws": "https://deno.land/std@0.95.0/ws/mod.ts"
+    }
+}
