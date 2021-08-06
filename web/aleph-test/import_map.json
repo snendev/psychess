@@ -1,0 +1,14 @@
+{
+  "imports": {
+    "~/": "./",
+    "aleph/": "https://deno.land/x/aleph@v0.3.0-alpha.33/",
+    "aleph/types": "https://deno.land/x/aleph@v0.3.0-alpha.33/types.ts",
+    "framework": "https://deno.land/x/aleph@v0.3.0-alpha.33/framework/core/mod.ts",
+    "framework/react": "https://deno.land/x/aleph@v0.3.0-alpha.33/framework/react/mod.ts",
+    "react": "https://esm.sh/react@17.0.2",
+    "react-dom": "https://esm.sh/react-dom@17.0.2",
+    "react-use-websocket": "https://esm.sh/react-use-websocket@2.7.1",
+    "websocket": "https://deno.land/x/websocket@v0.1.1/mod.ts"
+  },
+  "scopes": {}
+}
