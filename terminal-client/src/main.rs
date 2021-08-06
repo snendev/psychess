@@ -7,7 +7,8 @@ use termion::{
     screen::*,
 };
 use bojanchess::{
-    GameState, Color, WHITE_KING, BLACK_KING
+    GameState, Color,
+    pieces::{WHITE_KING, BLACK_KING},
 };
 
 mod display;
