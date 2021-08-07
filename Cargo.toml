@@ -3,5 +3,5 @@
 members = [
     "bojanchess",
     "terminal-client",
-    "web/server/wasm-chess",
+    "web/wasm-chess",
 ]
