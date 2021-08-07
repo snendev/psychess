@@ -30,7 +30,7 @@ function handleSelection(game: WasmClient, position: Position | null) {
   game.select_square(target.row, target.col)
 }
 
-const PORT = 8080;
+const PORT = 8085;
 
 const server = serve(`:${PORT}`)
 console.log(
@@ -87,14 +87,14 @@ const wsRegex = /\/game\/[0-9]+/g
 
 for await (const req of server) {
   // avoid blocking 
-  (async () => {
+  (async function() {
     const { headers, method, url } = req
     
     if (url === "/index.html" && method === "GET") {
       const game = new WasmClient()
       const render = game.render_board()
-      const board_array = Array.from(render).map<string>(get_piece_from_u32)
-      req.respond({ body: JSON.stringify(board_array) })
+      const boardArray = Array.from(render).map<string>(get_piece_from_u32)
+      req.respond({ body: JSON.stringify(boardArray) })
       return
     }
     if (url === "/api/start") {
@@ -110,17 +110,15 @@ for await (const req of server) {
         return
       }
       const { conn, r: bufReader, w: bufWriter } = req
-      acceptWebSocket({
+      const socket = await acceptWebSocket({
         conn,
         bufReader,
         bufWriter,
         headers
       })
-        .then((socket: WebSocket) => handleGameSocket(game, socket))
-        .catch(async (err) => {
-          console.error(`failed to accept websocket: ${err}`);
-          await req.respond({ status: 400 });
-        });
+      handleGameSocket(game, socket)
+      return
     }
+    console.log(url)
   })();
 }

@@ -4,17 +4,15 @@ import useWebSocket from 'react-use-websocket'
 
 import Logo from '~/components/logo.tsx'
 
-// TODO sync w/ app.tsx
-const SOCKET_PORT = 8085
 
 export default function Home() {
-  const handleMessage = React.useCallback((message) => {
+  const onMessage = React.useCallback((message: string) => {
     console.log(message)
   }, [])
 
   const {lastMessage, sendJsonMessage} = useWebSocket(
-    `ws://127.0.0.1:${SOCKET_PORT}`,
-    {onMessage: handleMessage}
+    `ws://localhost:8080/api/game`,
+    {onMessage}
   )
 
   function message() {

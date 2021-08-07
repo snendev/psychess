@@ -9,7 +9,7 @@
     "react": "https://esm.sh/react@17.0.2",
     "react-dom": "https://esm.sh/react-dom@17.0.2",
     "react-use-websocket": "https://esm.sh/react-use-websocket@2.7.1",
-    "websocket": "https://deno.land/x/websocket@v0.1.1/mod.ts"
+    "ws": "https://deno.land/std@0.96.0/ws/mod.ts"
   },
   "scopes": {}
 }
