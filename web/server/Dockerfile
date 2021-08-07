@@ -1,3 +1,5 @@
+### TODO REWRITE
+
 ## build rust in first container
 FROM rust:1.51.0 as wasm-builder
 
