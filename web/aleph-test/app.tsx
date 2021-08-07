@@ -1,7 +1,7 @@
 import React, { ComponentType } from 'react'
 import { useDeno } from 'framework/react'
 
-import runGameServer from './game'
+import runGameServer from '~/lib/game.ts'
 
 const SOCKET_PORT = 8085
 

@@ -1,9 +1,9 @@
 import { WebSocketServer, WebSocketClient } from 'websocket'
 
-import { WasmClient as GameClient, get_piece_from_u32 } from './lib/chess/wasm_chess'
+import { WasmClient as GameClient, get_piece_from_u32 as getPieceFromU32 } from '~/lib/chess/wasm_chess.js'
 
 class MapById<T extends {id: string}> {
-  _data: Record<T['id'], T> = {} as Record<T['id'], T>
+  _data: Record<string, T> = {}
 
   _counter = 0
   _prefix
@@ -102,7 +102,7 @@ interface GameRender {
 function render(client: GameClient): GameRender  {
   const board = client.render_board()
   const pieces = Array.from(board).map<Piece | null>((pieceValue) => {
-    const piece = get_piece_from_u32(pieceValue)
+    const piece = getPieceFromU32(pieceValue)
     if (isPiece(piece)) return piece
     return null
   })
