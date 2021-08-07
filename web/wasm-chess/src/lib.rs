@@ -28,25 +28,42 @@ impl From<PieceRender> for u32 {
     }
 }
 
+const WHITE_KING_CHAR: char = '\u{2654}';
+const WHITE_QUEEN_CHAR: char = '\u{2655}';
+const WHITE_ROOK_CHAR: char = '\u{2656}';
+const WHITE_BISHOP_CHAR: char = '\u{2657}';
+const WHITE_KNIGHT_CHAR: char = '\u{2658}';
+const WHITE_PAWN_CHAR: char = '\u{2659}';
+const BLACK_KING_CHAR: char = '\u{265A}';
+const BLACK_QUEEN_CHAR: char = '\u{265B}';
+const BLACK_ROOK_CHAR: char = '\u{265C}';
+const BLACK_BISHOP_CHAR: char = '\u{265D}';
+const BLACK_KNIGHT_CHAR: char = '\u{265E}';
+const BLACK_PAWN_CHAR: char = '\u{265F}';
+
 #[wasm_bindgen]
 pub fn get_piece_from_u32(value: u32) -> String {
     let adjusted = value + 1;
     let value = match (adjusted / 2, adjusted % 2) {
-        (1, 0) => "WhitePawn",
-        (1, 1) => "BlackPawn",
-        (2, 0) => "WhiteKnight",
-        (2, 1) => "BlackKnight",
-        (3, 0) => "WhiteBishop",
-        (3, 1) => "BlackBishop",
-        (4, 0) => "WhiteRook",
-        (4, 1) => "BlackRook",
-        (5, 0) => "WhiteQueen",
-        (5, 1) => "BlackQueen",
-        (6, 0) => "WhiteKing",
-        (6, 1) => "BlackKing",
-        (_, _) => "Empty",
+        (1, 0) => Some(WHITE_PAWN_CHAR),
+        (1, 1) => Some(BLACK_PAWN_CHAR),
+        (2, 0) => Some(WHITE_KNIGHT_CHAR),
+        (2, 1) => Some(BLACK_KNIGHT_CHAR),
+        (3, 0) => Some(WHITE_BISHOP_CHAR),
+        (3, 1) => Some(BLACK_BISHOP_CHAR),
+        (4, 0) => Some(WHITE_ROOK_CHAR),
+        (4, 1) => Some(BLACK_ROOK_CHAR),
+        (5, 0) => Some(WHITE_QUEEN_CHAR),
+        (5, 1) => Some(BLACK_QUEEN_CHAR),
+        (6, 0) => Some(WHITE_KING_CHAR),
+        (6, 1) => Some(BLACK_KING_CHAR),
+        (_, _) => None,
     };
-    value.to_string()
+    if let Some(c) = value {
+        c.to_string()
+    } else {
+        "".to_string()
+    }
 }
 
 #[wasm_bindgen]

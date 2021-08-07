@@ -15,7 +15,7 @@ export default function Home() {
   const {sendJsonMessage} = useWebSocket(`ws://127.0.0.1:${SOCKET_PORT}`)
 
   function message() {
-    sendJsonMessage({type: 'test'})
+    sendJsonMessage({type: 'find-match'})
   }
 
   return (
