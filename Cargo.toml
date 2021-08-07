@@ -2,6 +2,5 @@
 
 members = [
     "bojanchess",
-    "terminal-client",
     "web/wasm-chess",
 ]
