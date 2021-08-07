@@ -6,7 +6,7 @@ import {
   WebSocket,
 } from "ws";
 
-import { WasmClient as GameClient, get_piece_from_u32 as getPieceFromU32 } from '~/lib/chess/wasm_chess.js'
+import { WasmClient as GameClient, get_piece_from_u32 as getPieceFromU32 } from './chess/wasm_chess.js'
 
 interface Position {
   row: number

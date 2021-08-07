@@ -16,7 +16,7 @@ export default function Home() {
   )
 
   function message() {
-    sendJsonMessage()
+    sendJsonMessage({hello: 'hello'})
   }
 
   return (
