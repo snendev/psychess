@@ -9,10 +9,11 @@ cd ./app
 deno run --allow-read --allow-write build.ts
 
 # reload files for an initial build
-alephjs dev --reload
+rm -rf .aleph
+alephjs dev
 
-# server will eventually terminate via error
-
+## server will eventually terminate via error
+## if not, issue SIGTERM and run next lines manually
 # adjust build to work
 deno run --allow-read --allow-write postreload.ts development
 
