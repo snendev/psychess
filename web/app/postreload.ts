@@ -22,27 +22,13 @@ function replaceDirnameLine(input: string[]): string[] {
   ]
 }
 
-// URL doesn't work this way (anymore?)
-function replaceWasiSnapshotLine(input: string[]): string[] {
-  const lineIndex = input.findIndex((line) => line.includes('wasi_snapshot_preview1'))
-  if (lineIndex === -1) return input
-  
-  const newImportDeclaration = "imports['wasi_snapshot_preview1'] = wasi.exports"
-
-  return [
-    ...input.slice(0, lineIndex - 1),
-    newImportDeclaration,
-    ...input.slice(lineIndex + 1),
-  ]
-}
-
 if (mode !== "development" && mode !== "production") {
   console.error("Usage: deno run --allow-read --allow-write postreload.ts {development | production}")
 } else {
   const jsText = Deno.readTextFileSync(`./.aleph/${mode}/api/game/wasm/wasm_chess.js`)
   const jsLines = jsText.split('\n')
   
-  const newJsText = replaceWasiSnapshotLine(replaceDirnameLine((jsLines))).join('\n')
+  const newJsText = replaceDirnameLine((jsLines)).join('\n')
   
   Deno.writeTextFileSync('./.aleph/${mode}/api/game/wasm/wasm_chess.js', newJsText)
 }

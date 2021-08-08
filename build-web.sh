@@ -2,10 +2,10 @@ cd ~/grovest/chessvariant
 cargo build
 
 cd ./web/wasm-chess
-rustwasmc build --no-wasi --target deno --out-dir ../aleph-test/api/game/wasm ./
+rustwasmc build --no-wasi --target deno --out-dir ../app/api/game/wasm ./
 cd ..
 
-cd ./aleph-test
+cd ./app
 deno run --allow-read --allow-write build.ts
 
 # reload files for an initial build

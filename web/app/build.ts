@@ -35,9 +35,22 @@ function replaceUrlLine(input: string[]): string[] {
   ]
 }
 
+function replaceWasiSnapshotLine(input: string[]): string[] {
+  const lineIndex = input.findIndex((line) => line.includes('wasi_snapshot_preview1'))
+  if (lineIndex === -1) return input
+  
+  const newImportDeclaration = "imports['wasi_snapshot_preview1'] = wasi.exports"
+
+  return [
+    ...input.slice(0, lineIndex),
+    newImportDeclaration,
+    ...input.slice(lineIndex + 1),
+  ]
+}
+
 const jsText = Deno.readTextFileSync('./api/game/wasm/wasm_chess.js')
 const jsLines = jsText.split('\n')
  
-const newJsText = replaceBytesLine(replaceUrlLine((jsLines))).join('\n')
+const newJsText = replaceWasiSnapshotLine(replaceBytesLine(replaceUrlLine((jsLines)))).join('\n')
 
 Deno.writeTextFileSync('./api/game/wasm/wasm_chess.js', newJsText)
