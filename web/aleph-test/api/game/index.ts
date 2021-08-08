@@ -6,7 +6,7 @@ import {
   WebSocket,
 } from "ws";
 
-import { WasmClient as GameClient, get_piece_from_u32 as getPieceFromU32 } from './chess/wasm_chess.js'
+import { WasmClient as GameClient, get_piece_from_u32 as getPieceFromU32 } from './wasm/wasm_chess.js'
 
 interface Position {
   row: number
@@ -204,6 +204,7 @@ export default function handler(req: APIRequest) {
           return newGame.id
         }
       })()
+
       const game = store.get(myConnGameId)
       if (game) handleGameSocket(game.client, socket)
       else socket.close()

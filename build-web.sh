@@ -1,16 +1,19 @@
+cd ~/grovest/chessvariant
 cargo build
 
 cd ./web/wasm-chess
-rustwasmc build --no-wasi --target deno --out-dir ../server/wasm-chess/pkg ./
-cd ..
-cp -r ./server/wasm-chess/pkg ./aleph-test/api/game/
-rm -rf ./aleph-test/api/game/chess
-mv ./aleph-test/api/game/pkg ./aleph-test/api/game/chess
+rustwasmc build --no-wasi --target deno --out-dir ../aleph-test/api/game/wasm ./
 cd ..
 
-cd ./web/aleph-test
+cd ./aleph-test
+deno run --allow-read --allow-write build.ts
 
-### run deno run --allow-read --allow-write build.ts
-### go into ./.aleph/development/api/game/chess/wasm_chess.js#L100, file path leading "/" needs to be removed
+# reload files for an initial build
+alephjs dev --reload
 
-# alephjs dev --reload
+# server will eventually terminate via error
+
+# adjust build to work
+deno run --allow-read --allow-write postreload.ts development
+
+alephjs dev

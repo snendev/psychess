@@ -1,17 +1,13 @@
-// builds chess wasm binary into the js bundle
+// inline chess wasm byte sequence into the js bundle
 // only necessary because alephjs does not yet support bundling wasm files
-
-const jsText = Deno.readTextFileSync('./api/game/chess/wasm_chess.js')
-const jsLines = jsText.split('\n')
-
 function replaceBytesLine(input: string[]): string[] {
   const lineIndex = input.findIndex((line) => line.startsWith('const p'))
   if (lineIndex === -1) return input
 
-  const wasmBin = Deno.readFileSync('./api/game/chess/wasm_chess_bg.wasm')
-  
+  const wasmBin = Deno.readFileSync('./api/game/wasm/wasm_chess_bg.wasm')
+
   const wasmBinString = Array.from(wasmBin).map((uint8) => `${uint8}`).join(',')
-  
+
   const newPDeclaration =
   `const buffer = new ArrayBuffer(${wasmBin.length})
   const bytes = new Uint8Array(buffer)
@@ -24,6 +20,7 @@ function replaceBytesLine(input: string[]): string[] {
   ]
 }
 
+// URL doesn't work this way (anymore?)
 function replaceUrlLine(input: string[]): string[] {
   const lineIndex = input.findIndex((line) => line.startsWith('const __dirname'))
   if (lineIndex === -1) return input
@@ -38,6 +35,9 @@ function replaceUrlLine(input: string[]): string[] {
   ]
 }
 
+const jsText = Deno.readTextFileSync('./api/game/wasm/wasm_chess.js')
+const jsLines = jsText.split('\n')
+ 
 const newJsText = replaceBytesLine(replaceUrlLine((jsLines))).join('\n')
 
-Deno.writeTextFileSync('./api/game/chess/wasm_chess.js', newJsText)
+Deno.writeTextFileSync('./api/game/wasm/wasm_chess.js', newJsText)
