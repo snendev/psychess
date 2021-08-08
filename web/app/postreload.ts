@@ -30,6 +30,6 @@ if (mode !== "development" && mode !== "production") {
   
   const newJsText = replaceDirnameLine((jsLines)).join('\n')
   
-  Deno.writeTextFileSync('./.aleph/${mode}/api/game/wasm/wasm_chess.js', newJsText)
+  Deno.writeTextFileSync(`./.aleph/${mode}/api/game/wasm/wasm_chess.js`, newJsText)
 }
 

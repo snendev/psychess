@@ -6,61 +6,13 @@ import {
   WebSocket,
 } from "ws";
 
+import {Piece, isPiece} from "~/lib/pieces.ts"
+
 import { WasmClient as GameClient, get_piece_from_u32 as getPieceFromU32 } from './wasm/wasm_chess.js'
 
 interface Position {
   row: number
   col: number
-}
-
-const WHITE_KING_CHAR = '\u{2654}'
-const WHITE_QUEEN_CHAR = '\u{2655}'
-const WHITE_ROOK_CHAR = '\u{2656}'
-const WHITE_BISHOP_CHAR = '\u{2657}'
-const WHITE_KNIGHT_CHAR = '\u{2658}'
-const WHITE_PAWN_CHAR = '\u{2659}'
-const BLACK_KING_CHAR = '\u{265A}'
-const BLACK_QUEEN_CHAR = '\u{265B}'
-const BLACK_ROOK_CHAR = '\u{265C}'
-const BLACK_BISHOP_CHAR = '\u{265D}'
-const BLACK_KNIGHT_CHAR = '\u{265E}'
-const BLACK_PAWN_CHAR = '\u{265F}'
-
-type Piece =
-  | typeof WHITE_KING_CHAR
-  | typeof WHITE_QUEEN_CHAR
-  | typeof WHITE_ROOK_CHAR
-  | typeof WHITE_BISHOP_CHAR
-  | typeof WHITE_KNIGHT_CHAR
-  | typeof WHITE_PAWN_CHAR
-  | typeof BLACK_KING_CHAR
-  | typeof BLACK_QUEEN_CHAR
-  | typeof BLACK_ROOK_CHAR
-  | typeof BLACK_BISHOP_CHAR 
-  | typeof BLACK_KNIGHT_CHAR 
-  | typeof BLACK_PAWN_CHAR
-
-const PIECES: Set<Piece> = (function() {
-  // start with a record to typecheck completeness of the array
-  const PIECES_RECORD: Record<Piece, Piece> = {
-    [WHITE_KING_CHAR]: WHITE_KING_CHAR,
-    [WHITE_QUEEN_CHAR]: WHITE_QUEEN_CHAR,
-    [WHITE_ROOK_CHAR]: WHITE_ROOK_CHAR,
-    [WHITE_BISHOP_CHAR]: WHITE_BISHOP_CHAR,
-    [WHITE_KNIGHT_CHAR]: WHITE_KNIGHT_CHAR,
-    [WHITE_PAWN_CHAR]: WHITE_PAWN_CHAR,
-    [BLACK_KING_CHAR]: BLACK_KING_CHAR,
-    [BLACK_QUEEN_CHAR]: BLACK_QUEEN_CHAR,
-    [BLACK_ROOK_CHAR]: BLACK_ROOK_CHAR,
-    [BLACK_BISHOP_CHAR]: BLACK_BISHOP_CHAR,
-    [BLACK_KNIGHT_CHAR]: BLACK_KNIGHT_CHAR,
-    [BLACK_PAWN_CHAR]: BLACK_PAWN_CHAR,
-  }
-  return new Set(Object.values(PIECES_RECORD))
-})()
-
-function isPiece(str: string): str is Piece {
-  return str in PIECES
 }
 
 interface GameRender {
@@ -92,13 +44,14 @@ async function handleGameSocket(game: GameClient, socket: WebSocket) {
   }
 
   // publish game state to socket via a timeout
-  setTimeout(() => {
+  setInterval(() => {
     const board = render(game)
     send(board)
   }, 400)
 
   try {
     for await (const event of socket) {
+      console.log(`event: ${event}`)
       if (typeof event === "string") {
         // text message.
         console.log("ws:Text", event);
@@ -204,7 +157,7 @@ export default function handler(req: APIRequest) {
           return newGame.id
         }
       })()
-
+      console.log(myConnGameId)
       const game = store.get(myConnGameId)
       if (game) handleGameSocket(game.client, socket)
       else socket.close()
