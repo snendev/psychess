@@ -1,9 +1,9 @@
 import React from 'react'
-
 import useWebSocket from 'react-use-websocket'
+import ChessBoard from 'chessboard'
 
-import Logo from '~/components/logo.tsx'
 import {Piece} from '~/lib/pieces.ts'
+import {Board} from '~/lib/board.ts'
 
 interface BoardSquareProps {
   key: string
@@ -12,45 +12,93 @@ interface BoardSquareProps {
   onClick: () => void
 }
 
-function BoardSquare(props: BoardSquareProps) {
-  const {color, piece, onClick} = props
+interface BoardProps {
+  board: Board
+  select: (row: number, col: number) => void
+}
+
+function GameBoard({board, select}: BoardProps): JSX.Element {
+  const [flipped, setFlipped] = React.useState(false)
+  console.log(board)
   return (
-    <div aria-role="button" className={`square ${color}`} onClick={onClick}>
-      <span>
-        {piece}
-      </span>
-    </div>
+    <ChessBoard
+      allowDrag
+      draggable
+      dropOffBoard="snapback"
+      position={board}
+      flipped={flipped}
+    />
+  )
+  // return (
+  //   <table className="chessboard" cellSpacing="0" cellPadding="0">
+  //     {Array(8).fill(null).map((_, j) => (
+  //       <tr key={j}>
+  //         {Array(8).fill(null).map((_, i) => {
+  //           const piece = board.pieces[i*8+j]
+  //           return (
+  //             <BoardSquare
+  //               key={`${piece}-${j}-${i}`}
+  //               color={(j + i) % 2 === 0 ? 'dark' : 'light'}
+  //               piece={piece}
+  //               onClick={() => select(j, i)}
+  //             />
+  //           )
+  //         })}
+  //       </tr>
+  //     ))}
+  //   </table>
+  // )
+}
+
+function Connecting(): JSX.Element {
+  return (
+    <span>Connecting...</span>
   )
 }
 
+function shouldReconnect() {
+  console.log('Reconnecting...')
+  return true
+}
+
+function filterMessageEvents(message: WebSocketEventMap['message']): boolean {
+  try {
+    JSON.parse(message.data)
+    return true
+  } catch {
+    return false
+  }
+}
+
 export default function Home(): JSX.Element {
-  const [board, setBoard] = React.useState<(Piece | null)[] | null>(null)
+  const [board, setBoard] = React.useState<Board | null>(null)
 
   const onMessage = React.useCallback((message: {data: string}) => {
     const data = JSON.parse(message.data)
-
-    if ('board' in data) {
-      setBoard(data.board)
+    console.log(data)
+    const nextBoard = {
+      ...('pieces' in data ? {board: data.board} : {}),
+      ...('highlight' in data ? {board: data.highlight} : {}),
     }
+    setBoard(nextBoard as any)
   }, [])
 
   const onOpen = React.useCallback(() => {
     console.log('socket opened')
   }, [])
 
+  const onError = React.useCallback((event: WebSocketEventMap['error']) => {
+    console.log(event)
+  }, [])
+
   const socket = useWebSocket(
     `ws://localhost:8080/api/game`,
-    {onMessage, onOpen}
+    {onMessage, onOpen, onError, shouldReconnect, filter: filterMessageEvents}
   )
 
-  function select(row: number, col: number): void {
+  const select = React.useCallback((row: number, col: number): void => {
     socket.sendJsonMessage({type: 'select', position: {row, col}})
-  }
-
-  function message() {
-    console.log('Sending a message...')
-    socket.sendJsonMessage({hello: 'hello'})
-  }
+  }, [socket])
 
   return (
     <div className="page">
@@ -60,24 +108,8 @@ export default function Home(): JSX.Element {
       </head>
       <div className="frame">
         {board !== null
-          ? Array(8).fill(null).map((_, j) => (
-              <div key={j}>
-                {Array(8).fill(null).map((_, i) => {
-                  const piece = board[i*8+j]
-                  return (
-                    <BoardSquare
-                      key={`${piece}-${j}-${i}`}
-                      color={(j + i) % 2 === 0 ? 'dark' : 'light'}
-                      piece={piece}
-                      onClick={() => select(j, i)}
-                    />
-                  )
-                })}
-              </div>
-            ))
-          : (
-              <div>Connecting...</div>
-            )
+          ? <GameBoard board={board} select={select} />
+          : <Connecting />
         }
       </div>
     </div>

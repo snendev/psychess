@@ -6,27 +6,31 @@ import {
   WebSocket,
 } from "ws";
 
-import {Piece, isPiece} from "~/lib/pieces.ts"
+import {isPiece, CHESSBOARD_PIECE_KEY_MAP} from "~/lib/pieces.ts"
+import {Position, Board, getPosition, getFile} from '~/lib/board.ts'
 
-import { WasmClient as GameClient, get_piece_from_u32 as getPieceFromU32 } from './wasm/wasm_chess.js'
+import {
+  WasmClient as GameClient,
+  get_piece_from_u32 as getPieceFromU32,
+} from './wasm/wasm_chess.js'
 
-interface Position {
-  row: number
-  col: number
-}
-
-interface GameRender {
-  board: (Piece | null)[]
-}
-
-function render(client: GameClient): GameRender  {
+function render(client: GameClient): Board  {
   const board = client.render_board()
-  const pieces = Array.from(board).map<Piece | null>((pieceValue) => {
-    const piece = getPieceFromU32(pieceValue)
-    if (isPiece(piece)) return piece
-    return null
-  })
-  return {board: pieces}
+  const pieces = Object.fromEntries(
+    Array.from(board)
+      .map<[string, string] | null>(
+        (pieceValue, positionIndex) => {
+          const piece = getPieceFromU32(pieceValue)
+          if (!isPiece(piece)) return null
+          const position = getPosition(positionIndex)
+          return [`${getFile(position.col)}${position.row}`, CHESSBOARD_PIECE_KEY_MAP[piece]]
+        }
+      )
+      .filter(
+        <T>(value: T | null): value is T => value !== null
+      )
+  )
+  return {pieces}
 }
 
 type GameAction =
