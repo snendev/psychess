@@ -3,14 +3,7 @@ import useWebSocket from 'react-use-websocket'
 import ChessBoard from 'chessboard'
 
 import {Piece} from '~/lib/pieces.ts'
-import {Board} from '~/lib/board.ts'
-
-interface BoardSquareProps {
-  key: string
-  color: 'dark' | 'light'
-  piece: Piece
-  onClick: () => void
-}
+import {Board, getPositionFromSquare} from '~/lib/board.ts'
 
 interface BoardProps {
   board: Board
@@ -19,13 +12,23 @@ interface BoardProps {
 
 function GameBoard({board, select}: BoardProps): JSX.Element {
   const [flipped, setFlipped] = React.useState(false)
+  const {pieces, highlight} = board
   console.log(board)
   return (
     <ChessBoard
-      allowDrag
-      draggable
+      draggable={false}
       dropOffBoard="snapback"
-      position={board}
+      id="play"
+      position={pieces}
+      onSquareClick={(squareKey: string) => {
+        const { row, col } = getPositionFromSquare(squareKey)
+        select(row, col)
+      }}
+      squareStyles={highlight ? {
+        [highlight[0]]: {
+          backgroundColor: '#a2a220',
+        },
+      } : {}}
       flipped={flipped}
     />
   )
@@ -75,12 +78,10 @@ export default function Home(): JSX.Element {
 
   const onMessage = React.useCallback((message: {data: string}) => {
     const data = JSON.parse(message.data)
-    console.log(data)
-    const nextBoard = {
-      ...('pieces' in data ? {board: data.board} : {}),
-      ...('highlight' in data ? {board: data.highlight} : {}),
-    }
-    setBoard(nextBoard as any)
+    setBoard((prevBoard) => ({
+      pieces: ('pieces' in data ? data.pieces : prevBoard?.pieces) ?? [],
+      highlight: 'highlight' in data ? data.highlight : prevBoard?.highlight,
+    }))
   }, [])
 
   const onOpen = React.useCallback(() => {

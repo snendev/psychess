@@ -7,7 +7,7 @@ import {
 } from "ws";
 
 import {isPiece, CHESSBOARD_PIECE_KEY_MAP} from "~/lib/pieces.ts"
-import {Position, Board, getPosition, getFile} from '~/lib/board.ts'
+import {Square, Position, Board, getPosition, getSquare} from '~/lib/board.ts'
 
 import {
   WasmClient as GameClient,
@@ -18,12 +18,12 @@ function render(client: GameClient): Board  {
   const board = client.render_board()
   const pieces = Object.fromEntries(
     Array.from(board)
-      .map<[string, string] | null>(
+      .map<[Square, string] | null>(
         (pieceValue, positionIndex) => {
           const piece = getPieceFromU32(pieceValue)
           if (!isPiece(piece)) return null
           const position = getPosition(positionIndex)
-          return [`${getFile(position.col)}${position.row}`, CHESSBOARD_PIECE_KEY_MAP[piece]]
+          return [getSquare(position), CHESSBOARD_PIECE_KEY_MAP[piece]]
         }
       )
       .filter(
@@ -54,9 +54,16 @@ async function handleGameSocket(game: GameClient, socket: WebSocket) {
   }
 
   // publish game state to socket via a timeout
-  setInterval(() => {
+  const timeoutId = setInterval(() => {
+    if (socket.isClosed) {
+      clearInterval(timeoutId)
+      return
+    }
     send(render(game))
-  }, 400)
+  }, 1000)
+
+  // TODO figure out any race conditions
+  let lastHighlight: Square | null = null
 
   try {
     for await (const event of socket) {
@@ -73,7 +80,12 @@ async function handleGameSocket(game: GameClient, socket: WebSocket) {
           } else {
             handleSelection(game, null)
           }
-          send({event, json, board: render(game), highlight: json.position});
+          send({
+            event,
+            json,
+            board: render(game),
+            highlight: [getSquare(json.position)],
+          });
         } catch (error) {
           send("Invalid message.")
         }
