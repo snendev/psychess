@@ -48,3 +48,18 @@ const PIECES: Set<Piece> = (function() {
 export function isPiece(str: string): str is Piece {
   return PIECES.has(str as Piece)
 }
+
+export const CHESSBOARD_PIECE_KEY_MAP: Record<Piece, string> = {
+  [WHITE_KING_CHAR]: 'wK',
+  [WHITE_QUEEN_CHAR]: 'wQ',
+  [WHITE_ROOK_CHAR]: 'wR',
+  [WHITE_BISHOP_CHAR]: 'wB',
+  [WHITE_KNIGHT_CHAR]: 'wK',
+  [WHITE_PAWN_CHAR]: 'wP',
+  [BLACK_KING_CHAR]: 'bK',
+  [BLACK_QUEEN_CHAR]: 'bQ',
+  [BLACK_ROOK_CHAR]: 'bR',
+  [BLACK_BISHOP_CHAR]: 'bB',
+  [BLACK_KNIGHT_CHAR]: 'bK',
+  [BLACK_PAWN_CHAR]: 'bP',
+}

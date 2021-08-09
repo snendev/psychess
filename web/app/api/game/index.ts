@@ -44,14 +44,14 @@ function handleSelection(client: GameClient, position: Position | null) {
 }
 
 async function handleGameSocket(game: GameClient, socket: WebSocket) {
+  console.log('handling socket connection...')
   function send(data: {}) {
     socket.send(JSON.stringify(data))
   }
 
   // publish game state to socket via a timeout
   setInterval(() => {
-    const board = render(game)
-    send(board)
+    send(render(game))
   }, 400)
 
   try {
@@ -63,13 +63,13 @@ async function handleGameSocket(game: GameClient, socket: WebSocket) {
         try {
           const json = JSON.parse(event)
           if (!Object.keys(json).includes("type")) throw new Error()
-
+          console.log(json)
           if (json.type === "select") {
             handleSelection(game, json.position)
           } else {
             handleSelection(game, null)
           }
-          send({event, json});
+          send({event, json, board: render(game), highlight: json.position});
         } catch (error) {
           send("Invalid message.")
         }
