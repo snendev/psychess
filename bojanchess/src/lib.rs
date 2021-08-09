@@ -4,7 +4,7 @@ mod piece;
 mod position;
 
 pub use game::{Chess, GameState};
-pub use position::{Position, PositionColor};
+pub use position::{Position, PositionColor, get_index_position};
 pub use piece::{
     Piece,
     PieceType,

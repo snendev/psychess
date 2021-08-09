@@ -101,6 +101,12 @@ impl Sub for Position {
     }
 }
 
+pub fn get_index_position(value: i32) -> Position {
+    let col = value % 8;
+    let row = value / 8;
+    Position { row, col }
+}
+
 impl Position {
     pub fn get_index(&self) -> Result<usize, String> {
         if self.is_off_board() {
@@ -265,7 +271,6 @@ impl Position {
             .filter(|square| !square.is_off_board())
             .collect()
     }
-
 }
 
 #[cfg(test)]
