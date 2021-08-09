@@ -38,6 +38,11 @@ interface GameRegister {
   client: GameClient
 }
 
+function handleSelection(client: GameClient, position: Position | null) {
+  const target = position ?? { row: 100, col: 100 }
+  client.select_square(target.row, target.col)
+}
+
 async function handleGameSocket(game: GameClient, socket: WebSocket) {
   function send(data: {}) {
     socket.send(JSON.stringify(data))
@@ -88,11 +93,6 @@ async function handleGameSocket(game: GameClient, socket: WebSocket) {
       await socket.close(1000).catch(console.error);
     }
   }
-}
-
-function handleSelection(client: GameClient, position: Position | null) {
-  const target = position ?? { row: 100, col: 100 }
-  client.select_square(target.row, target.col)
 }
 
 // store to replace with redis
