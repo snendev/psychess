@@ -6,7 +6,10 @@ export interface Position {
 export type Square = string
 export interface Board {
   pieces: Record<Square, string>
-  highlight?: [Square, Square]
+}
+
+export function getPositionIndex(position: Position): number {
+  return position.row * 8 + position.col
 }
 
 export function getPosition(index: number): Position {
