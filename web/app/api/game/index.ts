@@ -116,6 +116,11 @@ class MultiClient {
     return this.clients[index]
   }
 
+  getClient = (id: string): Client | null => {
+    const client = this.clients.find((c) => c.id === id)
+    return client ?? null
+  }
+
   register = (client: Client) => {
     this.clients.push(client)
   }
@@ -160,21 +165,40 @@ async function runGame(gameHandle: GameHandle) {
       const json = JSON.parse(event)
       if (!Object.keys(json).includes("type")) throw new Error()
 
-      const currentTurnId = gameHandle.game.is_white_turn()
-        ? gameHandle.playerWhite
-        : gameHandle.playerBlack
-      if (player !== currentTurnId) continue
+      if (json.type === "move") {
+        const currentTurnId = gameHandle.game.is_white_turn()
+          ? gameHandle.playerWhite
+          : gameHandle.playerBlack
+  
+        if (player !== currentTurnId) continue
 
-      const origin = getPositionIndex(json.origin)
-      const target = getPositionIndex(json.target)
-      const ok = gameHandle.game.move_piece(origin, target)
-      const board = render(gameHandle.game)
-      gameHandle.clients.publish({
-        event,
-        json,
-        lastMove: ok ? [json.origin, json.target] : null,
-        ...board,
-      });
+        const origin = getPositionIndex(json.origin)
+        const target = getPositionIndex(json.target)
+        const ok = gameHandle.game.move_piece(origin, target)
+        const board = render(gameHandle.game)
+        gameHandle.clients.publish({
+          type: 'update',
+          event,
+          json,
+          lastMove: ok ? [json.origin, json.target] : null,
+          pieces: board.pieces,
+        });
+      }
+      if (json.type === "get-valid-targets") {
+        const origin = getPositionIndex(json.origin)
+        const targets = gameHandle.game.get_valid_targets(origin)
+        const playerClient = gameHandle.clients.getClient(player)
+        const validatedTargets = Array.from(targets).map(getPosition)
+        for (let i = 0; i < 10; i++) {
+          playerClient?.socket.send(
+            JSON.stringify({
+              type: 'update',
+              validatedTargets,
+            })
+          )
+        }
+      }
+
 
     } else if (isWebSocketPingEvent(event)) {
       const [, body] = event;
@@ -183,6 +207,8 @@ async function runGame(gameHandle: GameHandle) {
     } else if (isWebSocketCloseEvent(event)) {
       const { code, reason } = event;
       console.log("ws:Close", code, reason);
+      const playerClient = gameHandle.clients.getClient(player)
+      if (playerClient) gameHandle.clients.deregister(playerClient)
     }
   }
 }

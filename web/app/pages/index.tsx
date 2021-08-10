@@ -15,17 +15,19 @@ export default function Home(): JSX.Element {
   return (
     <div className="page">
       <head>
-        <title>WackyChess Web</title>
+        <title>PsyChess Online</title>
         <link rel="stylesheet" href="../style/index.css" />
       </head>
       <div className="frame">
         {game.status === 'connected'
           ? (
               <ChessBoard
-                pieces={game.handle.board.pieces}
+                pieces={game.handle.pieces}
                 lastMove={game.handle.lastMove}
                 movePiece={game.handle.movePiece}
                 myColor={game.handle.myColor}
+                requestValidTargets={game.handle.requestValidTargets}
+                validatedTargets={game.handle.validatedTargets}
               />
             )
           : <Connecting />

@@ -1,7 +1,7 @@
 import React from 'react'
 import useWebSocket from 'react-use-websocket'
 
-import {Board, Position} from '~/lib/board.ts'
+import {Board, Position, getSquare} from '~/lib/board.ts'
 import {Color} from '~/lib/pieces.ts'
 
 function shouldReconnect() {
@@ -15,26 +15,75 @@ type AsyncHandle<T> =
   | { status: 'connected'; handle: T}
 
 interface Game {
-  board: Board
+  pieces: Board['pieces']
   lastMove: [Position, Position] | null
   myColor: Color
+  // one-way requests; have to receive responses in onMessage
   movePiece: (origin: Position, target: Position) => void
+  // TODO: use wasm natively here and push into ChessBoard
+  validatedTargets: Position[]
+  requestValidTargets: (origin: Position) => void
+}
+
+interface GameHookState {
+  pieces: Board['pieces'] | null
+  myColor: Color
+  lastMove: [Position, Position] | null
+  validatedTargets: Position[]
+}
+
+const initialState: GameHookState = {
+  pieces: null,
+  myColor: 'white',
+  lastMove: null,
+  validatedTargets: [],
+}
+
+type GameHookAction =
+  | { type: 'update' } & Partial<GameHookState>
+  | { type: 'close' }
+  | { type: 'remove-targets' }
+
+function reducer(state: GameHookState, action: GameHookAction): GameHookState {
+  switch (action.type) {
+    case 'update': {
+      return {
+        pieces: action.pieces ?? state.pieces,
+        myColor: action.myColor ?? state.myColor,
+        lastMove: action.lastMove ?? state.lastMove,
+        validatedTargets: (action.validatedTargets?.length ?? 0) > 0
+          && action.validatedTargets
+          || state.validatedTargets,
+      }
+    }
+    case 'remove-targets': {
+      return {...state, validatedTargets: []}
+    }
+    case 'close': {
+      return {
+        pieces: null,
+        myColor: 'white',
+        lastMove: null,
+        validatedTargets: [],
+      }
+    }
+    default: {
+      console.warn(`Unsupported action: ${action}`)
+      return state
+    }
+  }
 }
 
 interface GameOptions {}
 
 export default function useGame(options?: GameOptions): AsyncHandle<Game> {
-  const [board, setBoard] = React.useState<Board | null>(null)
-  const [color, setColor] = React.useState<Color>('white')
-  const [lastMove, setLastMove] = React.useState<[Position, Position] | null>(null)
+  const [state, dispatch] = React.useReducer(reducer, initialState)
+  const {pieces, lastMove, myColor, validatedTargets} = state
 
   const onMessage = React.useCallback((message: {data: string}) => {
     const data = JSON.parse(message.data)
-    if ('myColor' in data) setColor(data.myColor)
-    if ('lastMove' in data && data.lastMove.length > 0) setLastMove(data.lastMove)
-    setBoard((prevBoard) => ({
-      pieces: ('pieces' in data ? data.pieces : prevBoard?.pieces) ?? [],
-    }))
+    console.log(data)
+    dispatch({ type: 'update', ...data })
   }, [])
 
   const onOpen = React.useCallback(() => {
@@ -46,7 +95,7 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
   }, [])
 
   const onClose = React.useCallback((_event: WebSocketEventMap['close']) => {
-    setBoard(null)
+    dispatch({ type: 'close' })
   }, [])
 
   const socket = useWebSocket(
@@ -55,12 +104,29 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
   )
 
   const movePiece = React.useCallback((origin: Position, target: Position): void => {
-    socket.sendJsonMessage({type: 'select', origin, target})
+    socket.sendJsonMessage({type: 'move', origin, target})
   }, [socket])
 
+  const requestValidTargets = React.useCallback((origin: Position) => {
+    dispatch({ type: 'remove-targets' })
+    if (pieces && getSquare(origin) in pieces) {
+      socket.sendJsonMessage({type: 'get-valid-targets', origin})
+    }
+  }, [socket, pieces])
+
   const handle = React.useMemo<Game | null>(
-    () => board ? ({board, lastMove, movePiece, myColor: color}) : null,
-    [board, lastMove, movePiece, color],
+    () =>
+      pieces
+        ? ({
+            pieces,
+            lastMove,
+            myColor,
+            validatedTargets,
+            movePiece,
+            requestValidTargets,
+          })
+        : null,
+    [pieces, lastMove, myColor, movePiece, validatedTargets, requestValidTargets],
   )
 
   if (handle === null) {

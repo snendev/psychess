@@ -9,10 +9,14 @@ interface BoardProps {
   lastMove: [Position, Position] | null
   movePiece: (origin: Position, target: Position) => void
   myColor: Color
+
+  // TODO: use wasm natively here and push into ChessBoard
+  validatedTargets: Position[]
+  requestValidTargets: (origin: Position) => void
 }
 
 export default function GameBoard(
-  {pieces, lastMove, movePiece, myColor}: BoardProps,
+  {pieces, lastMove, movePiece, myColor, validatedTargets, requestValidTargets}: BoardProps,
 ): JSX.Element {
   // bucket of arrows, highlights, etc.
   // const [features, setFeatures] = React.useState<[Square, Square | null][]>([])
@@ -25,9 +29,11 @@ export default function GameBoard(
     return targetColor === myColor
   }, [myColor])
 
-  // const handleSquareSelect = React.useCallback((square: Square) => {
-  //   if (selectedSquare) {}
-  // }, [selectedSquare])
+  const handleSquareSelect = React.useCallback((square: Square) => {
+    const position = getPositionFromSquare(square)
+    setSelectedSquare(square)
+    requestValidTargets(position)
+  }, [])
 
   const handleDrop = React.useCallback(
     ({sourceSquare: originSquare, targetSquare}: {sourceSquare: Square, targetSquare: Square}) => {
@@ -55,8 +61,16 @@ export default function GameBoard(
           backgroundColor: '#a2a220',
         },
       } : {}),
+      ...Object.fromEntries(
+        validatedTargets.map((target) => [
+          getSquare(target),
+          {
+            backgroundColor: '#dddddd',
+          },
+        ])
+      ),
     }),
-    [lastMove, selectedSquare],
+    [lastMove, selectedSquare, validatedTargets],
     )
 
   return (
@@ -65,7 +79,7 @@ export default function GameBoard(
       dropOffBoard="snapback"
       id="play"
       position={pieces}
-      // onSquareClick={handleSquareSelect}
+      onSquareClick={handleSquareSelect}
       onDrop={handleDrop}
       orientation={myColor}
       squareStyles={squareStyles}
