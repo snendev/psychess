@@ -1,4 +1,3 @@
-
 export const WHITE_KING_CHAR = '\u{2654}'
 export const WHITE_QUEEN_CHAR = '\u{2655}'
 export const WHITE_ROOK_CHAR = '\u{2656}'
@@ -11,6 +10,8 @@ export const BLACK_ROOK_CHAR = '\u{265C}'
 export const BLACK_BISHOP_CHAR = '\u{265D}'
 export const BLACK_KNIGHT_CHAR = '\u{265E}'
 export const BLACK_PAWN_CHAR = '\u{265F}'
+
+export type Color = 'black' | 'white'
 
 export type Piece =
   | typeof WHITE_KING_CHAR
@@ -48,6 +49,20 @@ const PIECES: Set<Piece> = (function() {
 export function isPiece(str: string): str is Piece {
   return PIECES.has(str as Piece)
 }
+
+export type PieceCode =
+  | 'wK'
+  | 'wQ'
+  | 'wR'
+  | 'wB'
+  | 'wN'
+  | 'wP'
+  | 'bK'
+  | 'bQ'
+  | 'bR'
+  | 'bB'
+  | 'bN'
+  | 'bP'
 
 export const CHESSBOARD_PIECE_KEY_MAP: Record<Piece, string> = {
   [WHITE_KING_CHAR]: 'wK',
