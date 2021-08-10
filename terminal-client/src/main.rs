@@ -121,6 +121,8 @@ fn main() {
 
     render_board(&mut out, &game, player_color);
 
+    // TODO reimpl selection logic here
+    // let mut selected_square: Option<Position>;
     for keypress in stdin.events() {
         let event = keypress.unwrap();
         match event {
