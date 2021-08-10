@@ -1,21 +1,19 @@
 import React from 'react'
 import ChessBoard from 'chessboard'
 
-import {Board, Position, Square, getPositionFromSquare} from '~/lib/board.ts'
+import {Board, Position, Square, getSquare, getPositionFromSquare} from '~/lib/board.ts'
 import {Color, PieceCode} from '~/lib/pieces.ts'
-// import useGame from '~/lib/useGame.ts'
 
 interface BoardProps {
-  board: Board
-  myColor: Color
+  pieces: Board['pieces']
+  lastMove: [Position, Position] | null
   movePiece: (origin: Position, target: Position) => void
+  myColor: Color
 }
 
-export default function GameBoard({board, myColor, movePiece}: BoardProps): JSX.Element {
-  // whether the board is shown flipped or not
-  const [flipped, setFlipped] = React.useState(false)
-  // highlights the last move at the turn current displayed on the board
-  const [moveHighlights, setMoveHighlights] = React.useState<[Square, Square] | null>(null)
+export default function GameBoard(
+  {pieces, lastMove, movePiece, myColor}: BoardProps,
+): JSX.Element {
   // bucket of arrows, highlights, etc.
   // const [features, setFeatures] = React.useState<[Square, Square | null][]>([])
 
@@ -34,7 +32,6 @@ export default function GameBoard({board, myColor, movePiece}: BoardProps): JSX.
   const handleDrop = React.useCallback(
     ({sourceSquare: originSquare, targetSquare}: {sourceSquare: Square, targetSquare: Square}) => {
       setSelectedSquare(null)
-      setMoveHighlights([originSquare, targetSquare])
       movePiece(
         getPositionFromSquare(originSquare),
         getPositionFromSquare(targetSquare),
@@ -43,7 +40,24 @@ export default function GameBoard({board, myColor, movePiece}: BoardProps): JSX.
     [],
   )
 
-  const {pieces} = board
+  const squareStyles = React.useMemo(
+    () => ({
+      ...(lastMove ? ({
+        [getSquare(lastMove[0])]: {
+          backgroundColor: '#c6a220',
+        },
+        [getSquare(lastMove[1])]: {
+          backgroundColor: '#b3a220',
+        },
+      }) : {}),
+      ...(selectedSquare ? {
+        [selectedSquare]: {
+          backgroundColor: '#a2a220',
+        },
+      } : {}),
+    }),
+    [lastMove, selectedSquare],
+    )
 
   return (
     <ChessBoard
@@ -53,22 +67,8 @@ export default function GameBoard({board, myColor, movePiece}: BoardProps): JSX.
       position={pieces}
       // onSquareClick={handleSquareSelect}
       onDrop={handleDrop}
-      squareStyles={{
-        ...(moveHighlights ? ({
-          [moveHighlights[0]]: {
-            backgroundColor: '#c6a220',
-          },
-          [moveHighlights[1]]: {
-            backgroundColor: '#b3a220',
-          },
-        }) : {}),
-        ...(selectedSquare ? {
-          [selectedSquare]: {
-            backgroundColor: '#a2a220',
-          },
-        } : {}),
-      }}
-      flipped={flipped}
+      orientation={myColor}
+      squareStyles={squareStyles}
     />
   )
 }

@@ -88,11 +88,12 @@ impl WasmClient {
         WasmClient(GameState::default())
     }
 
-    pub fn move_piece(&mut self, origin: i32, target: i32) {
+    pub fn move_piece(&mut self, origin: i32, target: i32) -> bool {
         let origin = PositionRender::from(origin).0;
         let target = PositionRender::from(target).0;
         // TODO serialize board move
-        self.0.move_piece(origin, target).unwrap();
+        let result = self.0.move_piece(origin, target);
+        result.is_ok()
     }
 
     pub fn get_valid_targets(&self, position: i32) -> Box<[i32]> {
@@ -109,7 +110,7 @@ impl WasmClient {
         }
     }
 
-    pub fn get_turn(&self) -> bool {
+    pub fn is_white_turn(&self) -> bool {
         self.0.get_turn_color() == Color::White
     }
 

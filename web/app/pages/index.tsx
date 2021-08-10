@@ -22,9 +22,10 @@ export default function Home(): JSX.Element {
         {game.status === 'connected'
           ? (
               <ChessBoard
-                board={game.handle.board}
-                myColor="white"
+                pieces={game.handle.board.pieces}
+                lastMove={game.handle.lastMove}
                 movePiece={game.handle.movePiece}
+                myColor={game.handle.myColor}
               />
             )
           : <Connecting />

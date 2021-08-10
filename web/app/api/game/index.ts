@@ -3,18 +3,19 @@ import {
   acceptWebSocket,
   isWebSocketCloseEvent,
   isWebSocketPingEvent,
+  WebSocketEvent,
   WebSocket,
 } from "ws";
 
 import {isPiece, CHESSBOARD_PIECE_KEY_MAP} from "~/lib/pieces.ts"
-import {Square, Position, Board, getPosition, getPositionIndex, getSquare} from '~/lib/board.ts'
+import {Square, Board, getPosition, getPositionIndex, getSquare} from '~/lib/board.ts'
 
 import {
   WasmClient as GameClient,
   get_piece_from_u32 as getPieceFromU32,
 } from './wasm/wasm_chess.js'
 
-function render(client: GameClient): Board  {
+function render(client: GameClient): {pieces: Board['pieces']}  {
   const board = client.render_board()
   const pieces = Object.fromEntries(
     Array.from(board)
@@ -33,74 +34,155 @@ function render(client: GameClient): Board  {
   return {pieces}
 }
 
-type GameAction =
-  | {type: 'select', position: Position}
-
-interface GameRegister {
+interface Client {
   id: string
-  status: 'open' | 'ready'
-  client: GameClient
+  socket: WebSocket
 }
 
-function handleMove(client: GameClient, origin: Position, target: Position) {
-  const originIndex = getPositionIndex(origin)
-  const targetIndex = getPositionIndex(target)
-  console.log({originIndex, targetIndex})
-  client.move_piece(originIndex, targetIndex)
+type NonEmptyArray<T> = [T, ...T[]]
+
+function isNonEmptyArray<T>(arr: T[]): arr is NonEmptyArray<T> {
+  return arr.length > 0
 }
 
-async function handleGameSocket(game: GameClient, socket: WebSocket) {
-  console.log('handling socket connection...')
-  function send(data: {}) {
-    socket.send(JSON.stringify(data))
+interface BaseGameHandle {
+  id: string
+  game: GameClient
+  clients: MultiClient
+}
+type ReadyGameHandle = BaseGameHandle & {
+  status: 'ready'
+  playerWhite: Client['id']
+  playerBlack: Client['id']
+}
+
+type GameHandle = BaseGameHandle & (
+  | { status: 'open' }
+  | { status: 'ready'; playerWhite: Client['id']; playerBlack: Client['id'] }
+)
+
+function isReady(handle: GameHandle): handle is ReadyGameHandle {
+  return handle.status === 'ready'
+}
+
+export function sleep(ms: number){
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+class MultiClient {
+  clients: NonEmptyArray<Client>
+
+  constructor(client: Client) {
+    this.clients = [client]
   }
 
-  // publish game state to socket via a timeout
-  const timeoutId = setInterval(() => {
-    if (socket.isClosed) {
-      clearInterval(timeoutId)
-      return
+  async* [Symbol.asyncIterator](): AsyncIterableIterator<[string, WebSocketEvent]> {
+    function getIterPromise(
+      {id, socket}: Client
+    ): Promise<[string, WebSocketEvent]> {
+      const asyncIter = socket[Symbol.asyncIterator]()
+      const promise = asyncIter.next().then<[string, WebSocketEvent]>(
+        (result) => [id, result.value]
+      )
+      return promise
     }
-    send(render(game))
-  }, 1000)
 
-  try {
-    for await (const event of socket) {
-      console.log(`event: ${event}`)
-      if (typeof event === "string") {
-        // text message.
-        console.log("ws:Text", event);
-        try {
-          const json = JSON.parse(event)
-          if (!Object.keys(json).includes("type")) throw new Error()
-          console.log({loc: 'handleMove', json})
-          handleMove(game, json.origin, json.target)
-          send({
-            event,
-            json,
-            board: render(game),
-          });
-        } catch (error) {
-          send("Invalid message.")
-        }
-      } else if (event instanceof Uint8Array) {
-        // binary message.
-        console.log("ws:Binary", event);
-      } else if (isWebSocketPingEvent(event)) {
-        const [, body] = event;
-        // ping.
-        console.log("ws:Ping", body);
-      } else if (isWebSocketCloseEvent(event)) {
-        // close.
-        const { code, reason } = event;
-        console.log("ws:Close", code, reason);
+    const currentPromises: Record<string, Promise<[string, WebSocketEvent]>> =
+      Object.fromEntries(
+        this.clients.map((client) => [client.id, getIterPromise(client)]),
+      )
+
+    while (true) {
+      // check for new streams
+      const newClients = this.clients.filter(({id}) => !(id in currentPromises))
+      Object.assign(
+        currentPromises,
+        Object.fromEntries(newClients.map((client) => [client.id, getIterPromise(client)])),
+      )
+      const promises = Object.values(currentPromises)
+
+      // race current promises
+      const [resultId, value] = await Promise.race(promises)
+
+      // "refill" promises array
+      const resolvedClient = this.clients.find(({id: clientId}) => resultId === clientId)
+      if (resolvedClient) currentPromises[resultId] = getIterPromise(resolvedClient)
+
+      yield [resultId, value]
+    }
+  }
+
+  get = (index: number): Client => {
+    return this.clients[index]
+  }
+
+  register = (client: Client) => {
+    this.clients.push(client)
+  }
+
+  deregister = (client: Client) => {
+    const map = this.clients.reduce<Record<string, Client>>((acc, c) => {
+      acc[c.id] = c
+      return acc
+    }, {})
+    
+    delete map[client.id]
+    const newList = Object.values(map)
+    if (isNonEmptyArray(newList)) {
+      this.clients = newList
+    }
+  }
+
+  publish = (data: {}) => {
+    for (let i = 0; i < this.clients.length; i++) {
+      for (let j = 0; j < 10; j++) {
+        this.clients[i].socket.send(JSON.stringify(data))
       }
     }
-  } catch (err) {
-    console.error(`failed to receive frame: ${err}`);
+  }
+}
 
-    if (!socket.isClosed) {
-      await socket.close(1000).catch(console.error);
+async function runGame(gameHandle: GameHandle) {
+  gameHandle.clients.publish(render(gameHandle.game))
+
+  // ping to render the game until the socket is satisfied and accepts us
+  // TODO watch out for rust errors (1 &Client, 1 &mut Client)
+  const firstRenderInterval = setInterval(() => {
+    gameHandle.clients.publish(render(gameHandle.game))
+  }, 1000)
+
+  for await (const [player, event] of gameHandle.clients) {
+    if (gameHandle.status === 'open') continue
+    clearInterval(firstRenderInterval)
+
+    console.log(`player ${player}: ${event}`)
+    if (typeof event === "string") {
+      const json = JSON.parse(event)
+      if (!Object.keys(json).includes("type")) throw new Error()
+
+      const currentTurnId = gameHandle.game.is_white_turn()
+        ? gameHandle.playerWhite
+        : gameHandle.playerBlack
+      if (player !== currentTurnId) continue
+
+      const origin = getPositionIndex(json.origin)
+      const target = getPositionIndex(json.target)
+      const ok = gameHandle.game.move_piece(origin, target)
+      const board = render(gameHandle.game)
+      gameHandle.clients.publish({
+        event,
+        json,
+        lastMove: ok ? [json.origin, json.target] : null,
+        ...board,
+      });
+
+    } else if (isWebSocketPingEvent(event)) {
+      const [, body] = event;
+      console.log("ws:Ping", body);
+
+    } else if (isWebSocketCloseEvent(event)) {
+      const { code, reason } = event;
+      console.log("ws:Close", code, reason);
     }
   }
 }
@@ -139,7 +221,7 @@ class Store<T extends {id: string}> {
   }
 }
 
-const store = new Store<GameRegister>("game")
+const store = new Store<GameHandle>("id")
 
 export default function handler(req: APIRequest) {
   const { conn, r: bufReader, w: bufWriter, headers } = req;
@@ -152,25 +234,37 @@ export default function handler(req: APIRequest) {
   })
     .then((socket) => {
       console.log("socket connected!");
-      const myConnGameId = (function() {
-        const foundGame = store.find((game) => game.status === 'open')
-        if (foundGame) {
-          store.set({...foundGame, status: 'ready'})
-          return foundGame.id
-        } else {
-          const newGame: GameRegister = {
-            id: store.makeId(),
-            client: new GameClient(),
-            status: 'open',
-          }
-          store.set(newGame)
-          return newGame.id
+      const foundGame = store.find((game) => game.status === 'open')
+      if (foundGame) {
+        foundGame.status = 'ready'
+        if (!isReady(foundGame)) throw new Error()
+        // decide on players and reset the store
+        const thisSocketId = store.makeId()
+        const {id: otherSocketId, socket: otherSocket} = foundGame.clients.get(0)
+        const playerWhite = Math.random() >= 0.5 ? thisSocketId : otherSocketId
+        const playerBlack = playerWhite === thisSocketId ? otherSocketId : thisSocketId
+
+        socket.send(JSON.stringify({myColor: playerWhite === thisSocketId ? 'white' : 'black'}))
+        otherSocket.send(JSON.stringify({myColor: playerWhite === otherSocketId ? 'white' : 'black'}))
+
+        console.log(`${foundGame.id} ready!`)
+
+        foundGame.clients.register({id: thisSocketId, socket})
+        foundGame.playerWhite = playerWhite
+        foundGame.playerBlack = playerBlack
+        store.set(foundGame)
+      } else {
+        const newGame: GameHandle = {
+          id: store.makeId(),
+          game: new GameClient(),
+          // just reuse the store ids, it's fine
+          clients: new MultiClient({id: store.makeId(), socket}),
+          status: 'open',
         }
-      })()
-      console.log(myConnGameId)
-      const game = store.get(myConnGameId)
-      if (game) handleGameSocket(game.client, socket)
-      else socket.close()
+        store.set(newGame)
+        runGame(newGame)
+        console.log(`${newGame.id} open!`)
+      }
     })
     .catch(async (err: unknown) => {
       console.error(`failed to accept websocket: ${err}`);

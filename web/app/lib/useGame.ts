@@ -2,19 +2,11 @@ import React from 'react'
 import useWebSocket from 'react-use-websocket'
 
 import {Board, Position} from '~/lib/board.ts'
+import {Color} from '~/lib/pieces.ts'
 
 function shouldReconnect() {
   console.log('Reconnecting...')
   return true
-}
-
-function filterMessageEvents(message: WebSocketEventMap['message']): boolean {
-  try {
-    JSON.parse(message.data)
-    return true
-  } catch {
-    return false
-  }
 }
 
 type AsyncHandle<T> =
@@ -24,6 +16,8 @@ type AsyncHandle<T> =
 
 interface Game {
   board: Board
+  lastMove: [Position, Position] | null
+  myColor: Color
   movePiece: (origin: Position, target: Position) => void
 }
 
@@ -31,12 +25,15 @@ interface GameOptions {}
 
 export default function useGame(options?: GameOptions): AsyncHandle<Game> {
   const [board, setBoard] = React.useState<Board | null>(null)
+  const [color, setColor] = React.useState<Color>('white')
+  const [lastMove, setLastMove] = React.useState<[Position, Position] | null>(null)
 
   const onMessage = React.useCallback((message: {data: string}) => {
     const data = JSON.parse(message.data)
-    if (data.type === 'ping') return
+    if ('myColor' in data) setColor(data.myColor)
+    if ('lastMove' in data && data.lastMove.length > 0) setLastMove(data.lastMove)
     setBoard((prevBoard) => ({
-        pieces: ('pieces' in data ? data.pieces : prevBoard?.pieces) ?? [],
+      pieces: ('pieces' in data ? data.pieces : prevBoard?.pieces) ?? [],
     }))
   }, [])
 
@@ -54,21 +51,16 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
 
   const socket = useWebSocket(
     `ws://localhost:8080/api/game`,
-    {onMessage, onOpen, onError, onClose, shouldReconnect, filter: filterMessageEvents},
+    {onMessage, onOpen, onError, onClose, shouldReconnect},
   )
-
-  // React.useEffect(() => {
-  //   function onPing() { console.log("ping detected", socket.send('pong')) }
-  //   if (socket) socket.getWebSocket().on("ping", onPing)
-  // }, [socket])
 
   const movePiece = React.useCallback((origin: Position, target: Position): void => {
     socket.sendJsonMessage({type: 'select', origin, target})
   }, [socket])
 
   const handle = React.useMemo<Game | null>(
-    () => board ? ({board, movePiece}) : null,
-    [board, movePiece],
+    () => board ? ({board, lastMove, movePiece, myColor: color}) : null,
+    [board, lastMove, movePiece, color],
   )
 
   if (handle === null) {
