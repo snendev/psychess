@@ -7,7 +7,7 @@ import {
 } from "ws";
 
 import {isPiece, CHESSBOARD_PIECE_KEY_MAP} from "~/lib/pieces.ts"
-import {Square, Position, Board, getPosition, getSquare} from '~/lib/board.ts'
+import {Square, Position, Board, getPosition, getPositionIndex, getSquare} from '~/lib/board.ts'
 
 import {
   WasmClient as GameClient,
@@ -42,9 +42,11 @@ interface GameRegister {
   client: GameClient
 }
 
-function handleSelection(client: GameClient, position: Position | null) {
-  const target = position ?? { row: 100, col: 100 }
-  client.select_square(target.row, target.col)
+function handleMove(client: GameClient, origin: Position, target: Position) {
+  const originIndex = getPositionIndex(origin)
+  const targetIndex = getPositionIndex(target)
+  console.log({originIndex, targetIndex})
+  client.move_piece(originIndex, targetIndex)
 }
 
 async function handleGameSocket(game: GameClient, socket: WebSocket) {
@@ -62,9 +64,6 @@ async function handleGameSocket(game: GameClient, socket: WebSocket) {
     send(render(game))
   }, 1000)
 
-  // TODO figure out any race conditions
-  let lastHighlight: Square | null = null
-
   try {
     for await (const event of socket) {
       console.log(`event: ${event}`)
@@ -74,17 +73,12 @@ async function handleGameSocket(game: GameClient, socket: WebSocket) {
         try {
           const json = JSON.parse(event)
           if (!Object.keys(json).includes("type")) throw new Error()
-          console.log(json)
-          if (json.type === "select") {
-            handleSelection(game, json.position)
-          } else {
-            handleSelection(game, null)
-          }
+          console.log({loc: 'handleMove', json})
+          handleMove(game, json.origin, json.target)
           send({
             event,
             json,
             board: render(game),
-            highlight: [getSquare(json.position)],
           });
         } catch (error) {
           send("Invalid message.")

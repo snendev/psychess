@@ -29,7 +29,7 @@ interface Game {
 
 interface GameOptions {}
 
-export default function useGame(options: GameOptions): AsyncHandle<Game> {
+export default function useGame(options?: GameOptions): AsyncHandle<Game> {
   const [board, setBoard] = React.useState<Board | null>(null)
 
   const onMessage = React.useCallback((message: {data: string}) => {
@@ -63,7 +63,7 @@ export default function useGame(options: GameOptions): AsyncHandle<Game> {
   // }, [socket])
 
   const movePiece = React.useCallback((origin: Position, target: Position): void => {
-    socket.sendJsonMessage({type: 'move', origin, target})
+    socket.sendJsonMessage({type: 'select', origin, target})
   }, [socket])
 
   const handle = React.useMemo<Game | null>(
