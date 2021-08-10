@@ -1,19 +1,19 @@
-use std::convert::{From, Into};
+use std::convert::{From, Into, TryInto};
 use wasm_bindgen::prelude::*;
 
-use bojanchess::{Chess, Color, GameState, Piece, PieceType, Position};
+use bojanchess::{Chess, Color, GameState, Piece, PieceType, Position, get_index_position};
 
 #[wasm_bindgen]
 pub struct WasmClient(GameState);
 
 struct PieceRender(Option<Piece>);
 
-impl From<PieceRender> for u32 {
+impl From<PieceRender> for i32 {
     fn from(piece: PieceRender) -> Self {
         // evens are white pieces, odds are black pieces
         if let Some(piece) = piece.0 {
-            let color_offset: u32 = if piece.get_color() == Color::White { 0 } else { 1 };
-            let piece_type_offset: u32 = match piece.get_type() {
+            let color_offset: i32 = if piece.get_color() == Color::White { 0 } else { 1 };
+            let piece_type_offset: i32 = match piece.get_type() {
                 PieceType::Pawn => 0,
                 PieceType::Knight => 1,
                 PieceType::Bishop => 2,
@@ -25,6 +25,21 @@ impl From<PieceRender> for u32 {
         } else {
             0
         }
+    }
+}
+
+#[wasm_bindgen]
+struct PositionRender(Position);
+
+impl From<PositionRender> for i32 {
+    fn from(position: PositionRender) -> Self {
+        position.0.get_index().unwrap_or(100).try_into().unwrap()
+    }
+}
+
+impl From<i32> for PositionRender {
+    fn from(position: i32) -> Self {
+        PositionRender(get_index_position(position))
     }
 }
 
@@ -42,7 +57,7 @@ const BLACK_KNIGHT_CHAR: char = '\u{265E}';
 const BLACK_PAWN_CHAR: char = '\u{265F}';
 
 #[wasm_bindgen]
-pub fn get_piece_from_u32(value: u32) -> String {
+pub fn get_piece_from_u32(value: i32) -> String {
     let adjusted = value + 1;
     let value = match (adjusted / 2, adjusted % 2) {
         (1, 0) => Some(WHITE_PAWN_CHAR),
@@ -73,23 +88,39 @@ impl WasmClient {
         WasmClient(GameState::default())
     }
 
-    pub fn select_square(&mut self, row: i32, col: i32) {
-        let target = Position { row, col };
-        self.0.select_square(Some(target));
+    pub fn move_piece(&mut self, origin: i32, target: i32) {
+        let origin = PositionRender::from(origin).0;
+        let target = PositionRender::from(target).0;
+        // TODO serialize board move
+        self.0.move_piece(origin, target).unwrap();
+    }
+
+    pub fn get_valid_targets(&self, position: i32) -> Box<[i32]> {
+        let origin = PositionRender::from(position).0;
+        let targets = self.0.get_valid_targets(origin);
+        match targets {
+            Ok(targets) =>
+                targets
+                    .iter()
+                    .map(|p| PositionRender(*p).into())
+                    .collect::<Vec<i32>>()
+                    .into_boxed_slice(),
+            _ => Box::new([])
+        }
     }
 
     pub fn get_turn(&self) -> bool {
         self.0.get_turn_color() == Color::White
     }
 
-    pub fn render_board(&self) -> Box<[u32]> {
+    pub fn render_board(&self) -> Box<[i32]> {
         self
             .0
             .get_board()
             .render()
             .iter()
             .map(|p| PieceRender(*p).into())
-            .collect::<Vec<u32>>()
+            .collect::<Vec<i32>>()
             .into_boxed_slice()
     }
 }

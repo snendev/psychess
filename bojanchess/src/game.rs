@@ -53,18 +53,11 @@ pub struct GameResult {
     pub winner: Option<Color>,
 }
 
-#[derive(Clone)]
-pub struct GameSelection {
-    square: Position,
-    pub valid_moves: Vec<Position>,
-}
-
 // TODO: either power_map is stored inside board and mutated from here, or this might be useless
 pub struct GameState {
     board: Board,
     captured_pieces: Vec<Piece>,
     move_log: Vec<BoardMove>,
-    selection: Option<GameSelection>,
     turn: Turn,
 }
 
@@ -73,13 +66,13 @@ pub trait Chess {
 
     fn get_move_history(&self) -> &Vec<BoardMove>;
 
-    fn get_selection(&self) -> &Option<GameSelection>;
-
     fn get_board(&self) -> &Board;
 
-    fn get_result(&self) -> Option<GameResult>;
+    fn get_game_result(&self) -> Option<GameResult>;
 
-    fn select_square(&mut self, position: Option<Position>);
+    fn get_valid_targets(&self, origin: Position) -> Result<Vec<Position>, String>;
+
+    fn move_piece(&mut self, origin: Position, target: Position) ->  Result<BoardMove, String>;
 }
 
 impl Default for GameState {
@@ -88,32 +81,12 @@ impl Default for GameState {
             board: Board::init_variant(),
             captured_pieces: vec![],
             move_log: vec![],
-            selection: None,
             turn: Turn(Color::White),
         }
     }
 }
 
 impl GameState {
-    fn commit_move(&mut self, target: Position, selection: &GameSelection) {
-        let selected_piece = self.board.get_piece_at_position(selection.square).unwrap();
-        let board_move = self.board.commit_move(&selected_piece, target);
-
-        let mut captures = self.captured_pieces.clone();
-        if let Some(board_move) = board_move {
-            if let Some(captured_piece) = board_move.capture {
-                captures.push(captured_piece.piece)
-            }
-            self.move_log.push(board_move);
-            self.captured_pieces = captures;
-            eprintln!("[before]: {}", self.turn.0);
-            self.turn.increment();
-            eprintln!("[after]: {}", self.turn.0);
-        }
-
-        self.selection = None;
-    }
-
     fn get_captured_king_color(&self) -> Option<Color> {
         let dead_king = self
             .captured_pieces
@@ -128,7 +101,7 @@ impl GameState {
         let can_move = current_turn_pieces
             .clone()
             .into_iter()
-            .filter(|piece| self.board.get_valid_moves(piece).len() != 0)
+            .filter(|piece| self.board.get_valid_targets(piece).len() != 0)
             .collect::<Vec<BoardPiece>>()
             .len() != 0;
         !can_move
@@ -145,15 +118,11 @@ impl Chess for GameState {
         &self.move_log
     }
 
-    fn get_selection(&self) -> &Option<GameSelection> {
-        &self.selection
-    }
-
     fn get_board(&self) -> &Board {
         &self.board
     }
 
-    fn get_result(&self) -> Option<GameResult> {
+    fn get_game_result(&self) -> Option<GameResult> {
         if let Some(loser) = self.get_captured_king_color() {
             return Some(
                 GameResult {
@@ -170,39 +139,55 @@ impl Chess for GameState {
             None
         }
     }
-    
-    fn select_square(&mut self, position: Option<Position>) {
-        if position.is_none() {
-            self.selection = None;
-            return;
-        }
-        let position = position.unwrap();
 
-        // if a piece is selected, see if we can move the piece
-        if let Some(selection) = &self.selection.clone() {
-            if selection.valid_moves.contains(&position) {
-                self.commit_move(position, selection);
-            } else {
-                self.selection = None;
-            }
-            return
+    fn get_valid_targets(&self, origin: Position) -> Result<Vec<Position>, String> {
+        let maybe_piece = self.board.get_piece_at_position(origin);
+        let piece = match maybe_piece {
+            Some(_piece) => _piece,
+            None => return Err("No piece to move at selected origin.".to_string()),
+        };
+
+        eprintln!(
+            "[select-piece]: {} ({}{}) at {}",
+            piece,
+            piece.piece.get_color(),
+            piece.piece.get_type(),
+            origin.get_key().unwrap(),
+        );
+        if self.get_turn_color() == piece.piece.get_color() {
+            let valid_moves = self.board.get_valid_targets(&piece);
+            Ok(valid_moves)
+        } else {
+            Err("Wrong player's turn.".to_string())
         }
-        // if not, see if we can select a piece
-        if let Some(piece) = self.board.get_piece_at_position(position) {
-            eprintln!(
-                "[select-piece]: {} ({}{}) at {}",
-                piece,
-                piece.piece.get_color(),
-                piece.piece.get_type(),
-                position.get_key().unwrap(),
-            );
-            if self.get_turn_color() == piece.piece.get_color() {
-                let valid_moves = self.board.get_valid_moves(&piece);
-                self.selection = Some(GameSelection {
-                    square: position,
-                    valid_moves,
-                });
+    }
+
+    fn move_piece(&mut self, origin: Position, target: Position) -> Result<BoardMove, String> {
+        let maybe_piece = self.board.get_piece_at_position(origin);
+        let moving_piece = match maybe_piece {
+            Some(_piece) => _piece,
+            None => return Err("No piece to move at selected origin.".to_string()),
+        };
+
+        let valid_moves = self.board.get_valid_targets(&moving_piece);
+        if valid_moves.contains(&target) {
+            let board_move = self.board.commit_move(&moving_piece, target);
+            if let Some(board_move) = board_move {
+                // TODO test: does this work?
+                // let mut captures = self.captured_pieces.iter_mut();
+                let mut captures = self.captured_pieces.clone();
+                if let Some(captured_piece) = board_move.capture {
+                    captures.push(captured_piece.piece)
+                }
+                self.move_log.push(board_move);
+                self.captured_pieces = captures;
+                self.turn.increment();
+                Ok(board_move)
+            } else {
+                Err("Invalid move.".to_string())
             }
+        } else {
+            Err("Target is not a valid move for selected piece.".to_string())
         }
     }
 }

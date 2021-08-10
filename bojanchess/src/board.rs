@@ -91,10 +91,11 @@ impl std::fmt::Display for BoardPiece {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct BoardMove {
     pub piece: Piece,
-    pub position: Position,
+    pub origin: Position,
+    pub target: Position,
     pub capture: Option<BoardPiece>,
 }
 
@@ -137,7 +138,7 @@ impl Board {
             .collect()
     }
 
-    pub fn get_valid_moves(&self, piece: &BoardPiece) -> Vec<Position> {
+    pub fn get_valid_targets(&self, piece: &BoardPiece) -> Vec<Position> {
         // for each piece
         // get piece position
         // powers available at position
@@ -186,7 +187,7 @@ impl Board {
 
     pub fn commit_move(&mut self, piece: &BoardPiece, target: Position) -> Option<BoardMove> {
         let is_valid = self
-            .get_valid_moves(piece)
+            .get_valid_targets(piece)
             .iter()
             .any(|square| *square == target);
 
@@ -217,7 +218,8 @@ impl Board {
             // register the BoardMove
             let new_move = BoardMove {
                 piece: piece.piece,
-                position: target,
+                origin: piece.origin,
+                target,
                 capture: *captured_piece,
             };
 
