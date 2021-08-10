@@ -1,11 +1,16 @@
 cd ~/grovest/chess
 
 if [ -z $1 ]; then
-    echo "Supply either 1 or 2"
+    echo "Usage: build-web.sh {dev | start} {1 | 2}"
     exit 1
 fi
 
-if [ $1 = "1" ]; then
+if [ -z $2 ]; then
+    echo "Usage: build-web.sh {dev | start} {1 | 2}"
+    exit 1
+fi
+
+if [ $2 = "1" ]; then
     cargo build
 
     cd ./web/wasm-chess
@@ -17,8 +22,8 @@ if [ $1 = "1" ]; then
 
     # reload files for an initial build
     rm -rf .aleph
-    alephjs dev
-elif [ $1 = "2" ]; then
+    alephjs $1
+elif [ $2 = "2" ]; then
     cd ./web/app
 
     ## server will eventually terminate via error if browser is open
@@ -26,7 +31,7 @@ elif [ $1 = "2" ]; then
     # adjust build to work
     deno run --allow-read --allow-write postreload.ts development
 
-    alephjs dev
+    alephjs $1
 fi
 
 exit 0
