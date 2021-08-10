@@ -1,6 +1,6 @@
 [workspace]
 
 members = [
-    "bojanchess",
+    "chess",
     "web/wasm-chess",
 ]

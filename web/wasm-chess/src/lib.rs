@@ -1,7 +1,7 @@
 use std::convert::{From, Into, TryInto};
 use wasm_bindgen::prelude::*;
 
-use bojanchess::{Chess, Color, GameState, Piece, PieceType, Position, get_index_position};
+use psychess::{Chess, Color, GameState, Piece, PieceType, Position, get_index_position};
 
 #[wasm_bindgen]
 pub struct WasmClient(GameState);

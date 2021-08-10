@@ -1,6 +1,0 @@
-[package]
-name = "bojanchess"
-version = "0.1.0"
-authors = ["snen <seansullygames@gmail.com>"]
-edition = "2018"
-keywords = ["chess", "chess variant", "gamdev", "windows"]
