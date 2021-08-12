@@ -9,15 +9,11 @@ function Connecting(): JSX.Element {
   )
 }
 
-export default function Home(): JSX.Element {
+export default function GamePage(): JSX.Element {
   const game = useGame()
 
   return (
     <div className="page">
-      <head>
-        <title>Psy(chic)Chess Online</title>
-        <link rel="stylesheet" href="../style/index.css" />
-      </head>
       <div className="frame">
         {game.status === 'connected'
           ? (

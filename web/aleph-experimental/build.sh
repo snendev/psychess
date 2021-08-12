@@ -8,6 +8,8 @@ if [ -z $2 ]; then
     exit 1
 fi
 
+cd "$(dirname "$0")"
+
 if [ $2 = "1" ]; then
     cd ../..
     cargo build

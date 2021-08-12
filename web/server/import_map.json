@@ -1,8 +1,9 @@
 {
-    "imports": {
-      "~/": "./",
+  "imports": {
+    "~/": "./",
 
-      "ws": "https://deno.land/std@0.96.0/ws/mod.ts"
-    },
-    "scopes": {}
-  }
+    "oak": "https://deno.land/x/oak@v8.0.0/mod.ts",
+    "ws": "https://deno.land/std@0.102.0/ws/mod.ts"
+  },
+  "scopes": {}
+}
