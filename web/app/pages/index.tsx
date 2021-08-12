@@ -15,7 +15,7 @@ export default function Home(): JSX.Element {
   return (
     <div className="page">
       <head>
-        <title>PsyChess Online</title>
+        <title>Psy(chic)Chess Online</title>
         <link rel="stylesheet" href="../style/index.css" />
       </head>
       <div className="frame">
@@ -26,8 +26,7 @@ export default function Home(): JSX.Element {
                 lastMove={game.handle.lastMove}
                 movePiece={game.handle.movePiece}
                 myColor={game.handle.myColor}
-                requestValidTargets={game.handle.requestValidTargets}
-                validatedTargets={game.handle.validatedTargets}
+                turn={game.handle.turn}
               />
             )
           : <Connecting />

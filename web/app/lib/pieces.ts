@@ -64,7 +64,7 @@ export type PieceCode =
   | 'bN'
   | 'bP'
 
-export const CHESSBOARD_PIECE_KEY_MAP: Record<Piece, string> = {
+export const CHESS_PIECE_CHAR_TO_CODE_MAP: Record<Piece, PieceCode> = {
   [WHITE_KING_CHAR]: 'wK',
   [WHITE_QUEEN_CHAR]: 'wQ',
   [WHITE_ROOK_CHAR]: 'wR',
@@ -78,3 +78,7 @@ export const CHESSBOARD_PIECE_KEY_MAP: Record<Piece, string> = {
   [BLACK_KNIGHT_CHAR]: 'bN',
   [BLACK_PAWN_CHAR]: 'bP',
 }
+
+export const CHESS_PIECE_CODE_TO_CHAR_MAP: Record<PieceCode, Piece> = Object.fromEntries(
+  Object.entries(CHESS_PIECE_CHAR_TO_CODE_MAP).map(([key, code]) => [code, key])
+) as Record<PieceCode, Piece>

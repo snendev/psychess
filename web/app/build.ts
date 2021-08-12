@@ -1,4 +1,4 @@
-const WASM_DIR = './lib/wasm'
+const WASM_DIR = './api/game/wasm'
 
 // inline chess wasm byte sequence into the js bundle
 // only necessary because alephjs does not yet support bundling wasm files

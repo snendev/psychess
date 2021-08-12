@@ -9,31 +9,55 @@ interface BoardProps {
   lastMove: [Position, Position] | null
   movePiece: (origin: Position, target: Position) => void
   myColor: Color
-
-  // TODO: use wasm natively here and push into ChessBoard
-  validatedTargets: Position[]
-  requestValidTargets: (origin: Position) => void
+  turn: Color
 }
 
 export default function GameBoard(
-  {pieces, lastMove, movePiece, myColor, validatedTargets, requestValidTargets}: BoardProps,
+  {pieces, lastMove, movePiece, myColor, turn}: BoardProps,
 ): JSX.Element {
   // bucket of arrows, highlights, etc.
   // const [features, setFeatures] = React.useState<[Square, Square | null][]>([])
 
   // last selected square
   const [selectedSquare, setSelectedSquare] = React.useState<Square | null>(null)
+  const [validTargets, setValidTargets] = React.useState<Square[]>([])
+
+  React.useEffect(() => {
+    let isCurrent = true
+    fetch(
+      '/api/game/getMoves',
+      {
+        method: 'post',
+        body: JSON.stringify({pieces, query: selectedSquare, turn}),
+      }
+    )
+      .then<{targets: Position[]}>((response) => response.json())
+      .then(({targets}) => {
+        if (isCurrent) setValidTargets(targets.map((position) => getSquare(position)))
+      })
+    return () => {
+      isCurrent = false
+    }
+  }, [selectedSquare])
 
   const allowDrag = React.useCallback(({piece}: {piece: PieceCode}) => {
     const targetColor = piece.charAt(0) === 'w' ? 'white' : 'black'
     return targetColor === myColor
   }, [myColor])
 
-  const handleSquareSelect = React.useCallback((square: Square) => {
-    const position = getPositionFromSquare(square)
-    setSelectedSquare(square)
-    requestValidTargets(position)
-  }, [])
+  const handleSquareSelect = React.useCallback((target: Square) => {
+    setValidTargets([])
+    if (!selectedSquare) {
+      setSelectedSquare(target)
+      return
+    }
+    setSelectedSquare(null)
+    if (!validTargets.includes(target)) return
+    movePiece(
+      getPositionFromSquare(selectedSquare),
+      getPositionFromSquare(target),
+    )
+  }, [pieces, selectedSquare, validTargets])
 
   const handleDrop = React.useCallback(
     ({sourceSquare: originSquare, targetSquare}: {sourceSquare: Square, targetSquare: Square}) => {
@@ -62,16 +86,16 @@ export default function GameBoard(
         },
       } : {}),
       ...Object.fromEntries(
-        validatedTargets.map((target) => [
-          getSquare(target),
+        validTargets.map((target) => [
+          target,
           {
             backgroundColor: '#dddddd',
           },
         ])
       ),
     }),
-    [lastMove, selectedSquare, validatedTargets],
-    )
+    [lastMove, selectedSquare, validTargets],
+  )
 
   return (
     <ChessBoard

@@ -1,3 +1,5 @@
+import {PieceCode} from '~/lib/pieces.ts'
+
 export interface Position {
   row: number
   col: number
@@ -5,7 +7,7 @@ export interface Position {
 
 export type Square = string
 export interface Board {
-  pieces: Record<Square, string>
+  pieces: Record<Square, PieceCode>
 }
 
 export function getPositionIndex(position: Position): number {

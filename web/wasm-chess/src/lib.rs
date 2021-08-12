@@ -6,6 +6,20 @@ use psychess::{BoardPiece, Chess, Color, GameState, Piece, PieceType, Position, 
 #[wasm_bindgen]
 pub struct WasmClient(GameState);
 
+struct PositionRender(Position);
+
+impl From<PositionRender> for i32 {
+    fn from(position: PositionRender) -> Self {
+        i32::try_from(position.0).unwrap_or(-1)
+    }
+}
+
+impl From<i32> for PositionRender {
+    fn from(value: i32) -> Self {
+        PositionRender(Position::from(value))
+    }
+}
+
 struct PieceRender(Option<Piece>);
 
 impl From<PieceRender> for Option<char> {
@@ -58,21 +72,6 @@ impl From<i32> for PieceRender {
 }
 
 #[wasm_bindgen]
-struct PositionRender(Position);
-
-impl From<PositionRender> for i32 {
-    fn from(position: PositionRender) -> Self {
-        i32::try_from(position.0).unwrap_or(-1)
-    }
-}
-
-impl From<i32> for PositionRender {
-    fn from(value: i32) -> Self {
-        PositionRender(Position::from(value))
-    }
-}
-
-#[wasm_bindgen]
 pub fn get_piece_from_i32(value: i32) -> String {
     let maybe_char: Option<char> = PieceRender::from(value).into();
     if let Some(c) = maybe_char {
@@ -80,6 +79,11 @@ pub fn get_piece_from_i32(value: i32) -> String {
     } else {
         "".to_string()
     }
+}
+
+#[wasm_bindgen]
+pub fn get_piece_index_from_character(value: char) -> i32 {
+    i32::from(PieceRender(Piece::try_from(value).ok()))
 }
 
 #[wasm_bindgen]

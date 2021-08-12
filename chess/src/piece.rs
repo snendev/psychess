@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Color {
     White,
@@ -127,6 +129,27 @@ pub const BLACK_ROOK: Piece = Piece::new(Color::Black, PieceType::Rook);
 pub const BLACK_QUEEN: Piece = Piece::new(Color::Black, PieceType::Queen);
 pub const BLACK_KING: Piece = Piece::new(Color::Black, PieceType::King);
 
+impl TryFrom<char> for Piece {
+    type Error = ();
+
+    fn try_from(character: char) -> Result<Self, Self::Error> {
+        match character {
+            WHITE_KING_CHAR => Ok(WHITE_KING),
+            WHITE_QUEEN_CHAR => Ok(WHITE_QUEEN),
+            WHITE_ROOK_CHAR => Ok(WHITE_ROOK),
+            WHITE_BISHOP_CHAR => Ok(WHITE_BISHOP),
+            WHITE_KNIGHT_CHAR => Ok(WHITE_KNIGHT),
+            WHITE_PAWN_CHAR => Ok(WHITE_PAWN),
+            BLACK_KING_CHAR => Ok(BLACK_KING),
+            BLACK_QUEEN_CHAR => Ok(BLACK_QUEEN),
+            BLACK_ROOK_CHAR => Ok(BLACK_ROOK),
+            BLACK_BISHOP_CHAR => Ok(BLACK_BISHOP),
+            BLACK_KNIGHT_CHAR => Ok(BLACK_KNIGHT),
+            BLACK_PAWN_CHAR => Ok(BLACK_PAWN),
+            _ => Err(()),
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
