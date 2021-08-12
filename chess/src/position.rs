@@ -14,7 +14,7 @@ pub enum PositionColor {
     Dark,
 }
 
-pub const ZERO: Position = Position { row: 0, col: 0 };
+pub const ZERO: Position = Position { row: -1, col: -1 };
 pub const A1: Position = Position { row: 0, col: 0 };
 pub const A2: Position = Position { row: 1, col: 0 };
 pub const A3: Position = Position { row: 2, col: 0 };

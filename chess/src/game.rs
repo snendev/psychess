@@ -76,7 +76,7 @@ pub trait Chess {
 
     fn get_game_result(&self) -> Option<GameResult>;
 
-    fn get_valid_targets(&self, origin: Position) -> Result<Vec<Position>, String>;
+    fn get_valid_targets(&self, origin: Position, ignore_color: bool) -> Result<Vec<Position>, String>;
 
     fn move_piece(&mut self, origin: Position, target: Position) ->  Result<BoardMove, String>;
 }
@@ -157,7 +157,7 @@ impl Chess for GameState {
         }
     }
 
-    fn get_valid_targets(&self, origin: Position) -> Result<Vec<Position>, String> {
+    fn get_valid_targets(&self, origin: Position, ignore_color: bool) -> Result<Vec<Position>, String> {
         let maybe_piece = self.board.get_piece_at_position(origin);
         let piece = match maybe_piece {
             Some(_piece) => _piece,
@@ -171,7 +171,7 @@ impl Chess for GameState {
             piece.piece.get_type(),
             String::try_from(origin).unwrap(),
         );
-        if self.get_turn_color() == piece.piece.get_color() {
+        if ignore_color || self.get_turn_color() == piece.piece.get_color() {
             let valid_moves = self.board.get_valid_targets(&piece);
             Ok(valid_moves)
         } else {
