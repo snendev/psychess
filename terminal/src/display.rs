@@ -1,5 +1,4 @@
-
-use bojanchess::{Position, PositionColor};
+use psychess::{Position, PositionColor};
 
 const VBAR: char = '|';
 const HBAR: char = '―';

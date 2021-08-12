@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::io::{stdin, stdout, Write};
 use rand::distributions::{Distribution, Uniform};
 use termion::{
@@ -6,8 +7,11 @@ use termion::{
     raw::{IntoRawMode},
     screen::*,
 };
-use bojanchess::{
-    GameState, Color,
+use psychess::{
+    Chess,
+    GameState,
+    Color,
+    Position,
     pieces::{WHITE_KING, BLACK_KING},
 };
 
@@ -70,14 +74,14 @@ fn input_player_color(out: &mut impl Write) -> Option<Color> {
     }
 }
 
-struct TerminalClient(GameState);
+struct TerminalClient(GameState, Option<Position>);
 
 fn render_board(out: &mut impl Write, game_state: &TerminalClient, player_color: Color) {
     let turn_color = game_state.0.get_turn_color();
     let king_piece = if turn_color == Color::White {
-        WHITE_KING.get_character()
+        char::from(&WHITE_KING)
     } else {
-        BLACK_KING.get_character()
+        char::from(&BLACK_KING)
     };
     let enemy_color = !player_color;
     write!(
@@ -115,7 +119,7 @@ fn main() {
     }
     let player_color = player_color.unwrap();
     let show_board_flipped = if player_color == Color::White { false } else { true };
-    let mut game = TerminalClient(GameState::default());
+    let mut game = TerminalClient(GameState::default(), None);
 
     let stdin = stdin();
 
@@ -135,7 +139,7 @@ fn main() {
                     } else {
                         click_position
                     };
-                    game.0.select_square(click_position);
+                    game.1 = click_position;
                 } else {
                     continue
                 }
@@ -146,7 +150,7 @@ fn main() {
         }
         render_board(&mut out, &game, player_color);
         
-        let game_result = game.0.get_result();
+        let game_result = game.0.get_game_result();
         eprintln!("[main]: {:?}", game_result);
         if let Some(result) = game_result {
             if let Some(winner) = result.winner {
@@ -185,9 +189,8 @@ impl std::fmt::Display for TerminalClient {
         let cell_width = PX_PER_CELL;
         let center_index = cell_width / 2;
 
-        let selection = self.0.get_selection().as_ref();
-        let highlight_squares = if let Some(selection) = selection {
-            Some(selection.valid_moves.clone())
+        let selection = if let Some(position) = self.1 {
+            self.0.get_valid_targets(position, false).ok()
         } else {
             None
         };
@@ -201,14 +204,14 @@ impl std::fmt::Display for TerminalClient {
                 let character = if sub_row == center_index && sub_col == center_index {
                     let position = get_position(x, y).unwrap();
 
-                    let index = position.get_index().unwrap();
+                    let index = i32::try_from(position).unwrap() as usize;
                     let piece_character = match board_map[index] {
-                        Some(piece) => Some(piece.get_character()),
-                        None => get_board_character(x, y, highlight_squares.clone()),
+                        Some(piece) => Some(char::from(&piece)),
+                        None => get_board_character(x, y, selection.clone()),
                     };
                     piece_character.unwrap()
                 } else {
-                    get_board_character(x, y, highlight_squares.clone()).unwrap()
+                    get_board_character(x, y, selection.clone()).unwrap()
                 };
 
                 board_display.push(character);

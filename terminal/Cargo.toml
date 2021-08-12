@@ -5,6 +5,6 @@ authors = ["snen <seansullygames@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-bojanchess = { path = "../bojanchess" }
+psychess = { path = "../chess" }
 rand = "*"
 termion = "*"
