@@ -7,6 +7,8 @@
 
 const mode = Deno.args[0]
 
+const WASM_DIR = `./.aleph/${mode}/lib/wasm`
+
 // inline chess wasm byte sequence into the js bundle
 // only necessary because alephjs does not yet support bundling wasm files
 function replaceDirnameLine(input: string[]): string[] {
@@ -25,11 +27,11 @@ function replaceDirnameLine(input: string[]): string[] {
 if (mode !== "development" && mode !== "production") {
   console.error("Usage: deno run --allow-read --allow-write postreload.ts {development | production}")
 } else {
-  const jsText = Deno.readTextFileSync(`./.aleph/${mode}/api/game/wasm/wasm_chess.js`)
+  const jsText = Deno.readTextFileSync(`${WASM_DIR}/wasm_chess.js`)
   const jsLines = jsText.split('\n')
   
   const newJsText = replaceDirnameLine((jsLines)).join('\n')
   
-  Deno.writeTextFileSync(`./.aleph/${mode}/api/game/wasm/wasm_chess.js`, newJsText)
+  Deno.writeTextFileSync(`${WASM_DIR}/wasm_chess.js`, newJsText)
 }
 

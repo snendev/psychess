@@ -1,10 +1,12 @@
+const WASM_DIR = './lib/wasm'
+
 // inline chess wasm byte sequence into the js bundle
 // only necessary because alephjs does not yet support bundling wasm files
 function replaceBytesLine(input: string[]): string[] {
   const lineIndex = input.findIndex((line) => line.startsWith('const p'))
   if (lineIndex === -1) return input
 
-  const wasmBin = Deno.readFileSync('./api/game/wasm/wasm_chess_bg.wasm')
+  const wasmBin = Deno.readFileSync(`${WASM_DIR}/wasm_chess_bg.wasm`)
 
   const wasmBinString = Array.from(wasmBin).map((uint8) => `${uint8}`).join(',')
 
@@ -48,9 +50,9 @@ function replaceWasiSnapshotLine(input: string[]): string[] {
   ]
 }
 
-const jsText = Deno.readTextFileSync('./api/game/wasm/wasm_chess.js')
+const jsText = Deno.readTextFileSync(`${WASM_DIR}/wasm_chess.js`)
 const jsLines = jsText.split('\n')
  
 const newJsText = replaceWasiSnapshotLine(replaceBytesLine(replaceUrlLine((jsLines)))).join('\n')
 
-Deno.writeTextFileSync('./api/game/wasm/wasm_chess.js', newJsText)
+Deno.writeTextFileSync(`${WASM_DIR}/wasm_chess.js`, newJsText)
