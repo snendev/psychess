@@ -1,4 +1,4 @@
-import {PieceCode} from '~/lib/pieces.ts'
+import {PieceCode} from './pieces'
 
 export interface Position {
   row: number

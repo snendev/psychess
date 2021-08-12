@@ -23,6 +23,7 @@ export default function GameBoard(
   const [validTargets, setValidTargets] = React.useState<Square[]>([])
 
   React.useEffect(() => {
+    if (!selectedSquare) return
     let isCurrent = true
     fetch(
       '/api/game/getMoves',
@@ -38,7 +39,7 @@ export default function GameBoard(
     return () => {
       isCurrent = false
     }
-  }, [selectedSquare])
+  }, [pieces, selectedSquare, turn])
 
   const allowDrag = React.useCallback(({piece}: {piece: PieceCode}) => {
     const targetColor = piece.charAt(0) === 'w' ? 'white' : 'black'
@@ -57,7 +58,7 @@ export default function GameBoard(
       getPositionFromSquare(selectedSquare),
       getPositionFromSquare(target),
     )
-  }, [pieces, selectedSquare, validTargets])
+  }, [movePiece, selectedSquare, validTargets])
 
   const handleDrop = React.useCallback(
     ({sourceSquare: originSquare, targetSquare}: {sourceSquare: Square, targetSquare: Square}) => {

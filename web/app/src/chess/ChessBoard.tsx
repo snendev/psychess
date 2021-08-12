@@ -1,8 +1,8 @@
 import React from 'react'
-import ChessBoard from 'chessboard'
+import ChessBoard from 'chessboardjsx'
 
-import {Board, Position, Square, getSquare, getPositionFromSquare} from '~/lib/board.ts'
-import {Color, PieceCode} from '~/lib/pieces.ts'
+import {Board, Position, Square, getSquare, getPositionFromSquare} from './board'
+import {Color, PieceCode} from './pieces'
 
 interface BoardProps {
   pieces: Board['pieces']
@@ -23,9 +23,10 @@ export default function GameBoard(
   const [validTargets, setValidTargets] = React.useState<Square[]>([])
 
   React.useEffect(() => {
+    if (!selectedSquare) return
     let isCurrent = true
     fetch(
-      '/api/game/getMoves',
+      'http://localhost:8080/api/getMoves',
       {
         method: 'post',
         body: JSON.stringify({pieces, query: selectedSquare, turn}),
@@ -38,7 +39,7 @@ export default function GameBoard(
     return () => {
       isCurrent = false
     }
-  }, [selectedSquare])
+  }, [pieces, selectedSquare, turn])
 
   const allowDrag = React.useCallback(({piece}: {piece: PieceCode}) => {
     const targetColor = piece.charAt(0) === 'w' ? 'white' : 'black'
@@ -57,7 +58,7 @@ export default function GameBoard(
       getPositionFromSquare(selectedSquare),
       getPositionFromSquare(target),
     )
-  }, [pieces, selectedSquare, validTargets])
+  }, [movePiece, selectedSquare, validTargets])
 
   const handleDrop = React.useCallback(
     ({sourceSquare: originSquare, targetSquare}: {sourceSquare: Square, targetSquare: Square}) => {
@@ -67,7 +68,7 @@ export default function GameBoard(
         getPositionFromSquare(targetSquare),
       )
     },
-    [],
+    [movePiece],
   )
 
   const squareStyles = React.useMemo(

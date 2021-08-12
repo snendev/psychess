@@ -1,23 +1,9 @@
-import {Color, CHESS_PIECE_CODE_TO_CHAR_MAP} from "~/chess/pieces.ts"
+import {CHESS_PIECE_CODE_TO_CHAR_MAP} from "~/chess/pieces.ts"
 import {Square, Board, Position, getPosition, getPositionIndex, getPositionFromSquare} from '~/chess/board.ts'
 import {
   create_board as createBoard,
   get_piece_index_from_character as getPieceIndex,
 } from '~/chess/wasm/wasm_chess.js'
-
-interface MovesRequestData {
-  pieces: Board['pieces']
-  query: Square
-  turn: Color
-}
-
-interface MovesResponseData extends MovesRequestData {
-  targets: unknown
-}
-
-function makeResponse(request: MovesRequestData, validMoves: unknown): MovesResponseData {
-  return {...request, targets: validMoves}
-}
 
 function createPiecePositionSlice(pieces: Board['pieces']): Int32Array {
   const values: number[] = Object.entries(pieces).flatMap(([square, pieceCode]) => {
@@ -33,14 +19,9 @@ function parseTargets(data: Int32Array): Position[] {
   return Array.from(data).map((positionIndex) => getPosition(positionIndex))
 }
 
-export default async function handler(req: APIRequest) {
-  console.log("/api/game/getMoves invoked")
-  const json = await req.readBody('json')
-  const {pieces, query} = json as MovesRequestData
-
+export default function getMoves(pieces: Board['pieces'], query: Square): Position[] {
   if (!pieces[query]) {
-    req.status(200).json(makeResponse(json, []))
-    return
+    return []
   }
 
   const slice = createPiecePositionSlice(pieces)
@@ -49,6 +30,5 @@ export default async function handler(req: APIRequest) {
   const origin = getPositionIndex(getPositionFromSquare(query))
   const data = boardClient.get_valid_targets(origin)
   const targets = parseTargets(data)
-  console.log({slice, data, targets, origin, boardClient})
-  req.status(200).json(makeResponse(json, targets))
+  return targets
 }

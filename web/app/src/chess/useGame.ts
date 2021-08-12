@@ -1,8 +1,8 @@
 import React from 'react'
 import useWebSocket from 'react-use-websocket'
 
-import {Board, Position} from '~/lib/board.ts'
-import {Color} from '~/lib/pieces.ts'
+import {Board, Position} from './board'
+import {Color} from './pieces'
 
 function shouldReconnect() {
   console.log('Reconnecting...')
@@ -99,7 +99,7 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
     `ws://localhost:8080/api/ws`,
     {onMessage, onOpen, onError, onClose, shouldReconnect},
   )
-  
+
   const movePiece = React.useCallback((origin: Position, target: Position): void => {
     socket.sendJsonMessage({type: 'move', origin, target})
   }, [socket])

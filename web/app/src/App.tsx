@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 
-import GamePage from './chess/GamePage'
+import GameFrame from './chess/GameFrame'
 
 function App() {
   return (
@@ -9,8 +9,8 @@ function App() {
       <header className="App-header">
         Psy(chic) Chess
       </header>
-      <main>
-        <GamePage />
+      <main className="main">
+        <GameFrame />
       </main>
     </div>
   );
