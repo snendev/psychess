@@ -18,7 +18,11 @@ impl core::ops::Not for Color {
 
 impl std::fmt::Display for Color {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let color = if *self == Color::White { "White" } else { "Black" };
+        let color = if *self == Color::White {
+            "White"
+        } else {
+            "Black"
+        };
         write!(f, "{}", color.to_string())
     }
 }

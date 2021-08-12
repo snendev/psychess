@@ -1,5 +1,5 @@
-use std::ops::{Add, Sub};
 use std::convert::TryFrom;
+use std::ops::{Add, Sub};
 
 use crate::piece::Color;
 
@@ -108,7 +108,10 @@ impl Position {
             let msg = format!("Invalid position: row {} col {}", self.row, self.col);
             Err(msg)
         } else {
-            Ok(Position { row: 7 - self.row, col: 7 - self.col })
+            Ok(Position {
+                row: 7 - self.row,
+                col: 7 - self.col,
+            })
         }
     }
 
@@ -214,7 +217,10 @@ impl TryFrom<Position> for i32 {
 
     fn try_from(position: Position) -> Result<Self, Self::Error> {
         if position.is_off_board() {
-            let msg = format!("Invalid position: row {} col {}", position.row, position.col);
+            let msg = format!(
+                "Invalid position: row {} col {}",
+                position.row, position.col
+            );
             Err(msg)
         } else {
             Ok(position.row * 8 + position.col)
@@ -286,7 +292,6 @@ impl TryFrom<String> for Position {
             Err(error) => Err(error.to_string()),
         }
     }
-
 }
 
 #[cfg(test)]

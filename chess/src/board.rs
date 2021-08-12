@@ -1,11 +1,9 @@
-use std::convert::TryFrom;
 use std::collections::HashMap;
+use std::convert::TryFrom;
 
 use crate::{
     piece::{
-        self,
-        Color,
-        Piece,
+        self, Color, Piece,
         PieceType::{self, Bishop, King, Knight, Pawn, Queen, Rook},
     },
     position::{self, Position},
@@ -134,7 +132,7 @@ impl Board {
         self.pieces
             .clone()
             .into_iter()
-            .filter(|&piece | piece.piece.get_color() == color)
+            .filter(|&piece| piece.piece.get_color() == color)
             .collect()
     }
 
@@ -250,19 +248,15 @@ impl Board {
     }
 
     fn is_available_square(&self, square: Position, color: Option<Color>) -> bool {
-        !self
-            .pieces
-            .clone()
-            .into_iter()
-            .any(|piece| {
-                let is_blocking = if let Some(color) = color {
-                    piece.piece.is_ally(color)
-                } else {
-                    true
-                };
-                let is_occupying_square = self.get_piece_position(&piece).unwrap() == square;
-                is_blocking && is_occupying_square
-            })
+        !self.pieces.clone().into_iter().any(|piece| {
+            let is_blocking = if let Some(color) = color {
+                piece.piece.is_ally(color)
+            } else {
+                true
+            };
+            let is_occupying_square = self.get_piece_position(&piece).unwrap() == square;
+            is_blocking && is_occupying_square
+        })
     }
 
     fn get_pawn_moves(&self, origin: Position, color: Color) -> Vec<Position> {
@@ -490,7 +484,6 @@ impl Board {
         board
     }
 }
-
 
 #[cfg(test)]
 mod tests {

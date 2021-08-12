@@ -76,9 +76,13 @@ pub trait Chess {
 
     fn get_game_result(&self) -> Option<GameResult>;
 
-    fn get_valid_targets(&self, origin: Position, ignore_color: bool) -> Result<Vec<Position>, String>;
+    fn get_valid_targets(
+        &self,
+        origin: Position,
+        ignore_color: bool,
+    ) -> Result<Vec<Position>, String>;
 
-    fn move_piece(&mut self, origin: Position, target: Position) ->  Result<BoardMove, String>;
+    fn move_piece(&mut self, origin: Position, target: Position) -> Result<BoardMove, String>;
 }
 
 impl Default for GameState {
@@ -120,7 +124,8 @@ impl GameState {
             .into_iter()
             .filter(|piece| self.board.get_valid_targets(piece).len() != 0)
             .collect::<Vec<BoardPiece>>()
-            .len() != 0;
+            .len()
+            != 0;
         !can_move
     }
 }
@@ -141,12 +146,10 @@ impl Chess for GameState {
 
     fn get_game_result(&self) -> Option<GameResult> {
         if let Some(loser) = self.get_captured_king_color() {
-            return Some(
-                GameResult {
-                    winner: Some(!loser),
-                    reason: GameCompletionReason::KingCapture,
-                }
-            )
+            return Some(GameResult {
+                winner: Some(!loser),
+                reason: GameCompletionReason::KingCapture,
+            });
         } else if self.is_stalemate() {
             Some(GameResult {
                 winner: Some(!self.get_turn_color()),
@@ -157,7 +160,11 @@ impl Chess for GameState {
         }
     }
 
-    fn get_valid_targets(&self, origin: Position, ignore_color: bool) -> Result<Vec<Position>, String> {
+    fn get_valid_targets(
+        &self,
+        origin: Position,
+        ignore_color: bool,
+    ) -> Result<Vec<Position>, String> {
         let maybe_piece = self.board.get_piece_at_position(origin);
         let piece = match maybe_piece {
             Some(_piece) => _piece,
