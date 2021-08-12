@@ -1,14 +1,14 @@
+use std::convert::TryFrom;
 use std::collections::HashMap;
 
 use crate::{
-    piece,
     piece::{
+        self,
         Color,
         Piece,
         PieceType::{self, Bishop, King, Knight, Pawn, Queen, Rook},
     },
-    position,
-    position::Position,
+    position::{self, Position},
 };
 
 // enum BoardResult {
@@ -37,12 +37,12 @@ fn print_map(map: PowerMap, color: Color, show_board_flipped: bool) -> String {
             } else {
                 position
             };
-            let key = position.get_key().unwrap();
+            let key = String::try_from(position).unwrap();
             let powers = map.get(&key);
             if let Some(powers) = powers {
                 for power in powers {
                     let piece = Piece::new(color, *power);
-                    grid.push(piece.get_character());
+                    grid.push(char::from(&piece));
                     grid.push(' ');
                 }
                 grid.push(',');
@@ -79,15 +79,15 @@ pub struct BoardPiece {
 }
 
 impl BoardPiece {
-    fn new(piece: Piece, origin: Position) -> Self {
+    pub fn new(piece: Piece, origin: Position) -> Self {
         BoardPiece { piece, origin }
     }
 }
 
 impl std::fmt::Display for BoardPiece {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let target = self.origin.get_key().unwrap_or("?".to_string());
-        write!(f, "{}({})", self.piece.get_character(), target)
+        let target = String::try_from(self.origin).unwrap_or("?".to_string());
+        write!(f, "{}({})", char::from(&self.piece), target)
     }
 }
 
@@ -145,7 +145,7 @@ impl Board {
         // yield moves for each Pos1,Pos2 tuple
         let origin = self.get_piece_position(piece).unwrap();
         let color = piece.piece.get_color();
-        let position_key = origin.get_key().unwrap_or("".to_string());
+        let position_key = String::try_from(origin).unwrap_or("".to_string());
 
         let powers = self.calculate_power_map(color);
         let piece_powers = powers.get(position_key.as_str());
@@ -194,7 +194,7 @@ impl Board {
         eprintln!(
             "[commit_move]: {} -> {}",
             piece,
-            target.get_key().unwrap_or("?".to_string()),
+            String::try_from(target).unwrap_or("?".to_string()),
         );
 
         if is_valid {
@@ -236,7 +236,7 @@ impl Board {
             let position = self.get_piece_position(piece).unwrap();
             // in order from top to bottom, the row on which to display the piece
             // if show_board_flipped, A1 appears in the top right corner
-            let index = position.get_index().unwrap();
+            let index = i32::try_from(position).unwrap() as usize;
             board_map[index] = Some(piece.piece);
         }
         board_map
@@ -362,8 +362,8 @@ impl Board {
 
         let mut push_targets = |piece_type: PieceType, targets: Vec<Position>| {
             for target in targets {
-                let key = target.get_key();
-                if let Some(key) = key {
+                let key = String::try_from(target);
+                if let Ok(key) = key {
                     let current_piece_powers = power_map.get(&key).unwrap_or(&vec![]).to_vec();
                     if !current_piece_powers.contains(&piece_type) {
                         let mut next_powers = current_piece_powers.clone();
@@ -510,7 +510,7 @@ mod tests {
     #[test]
     fn test_calculate_power_map() -> Result<(), String> {
         let pawn_position = Position { row: 3, col: 4 };
-        let pawn_key = pawn_position.get_key().unwrap();
+        let pawn_key = String::try_from(pawn_position).unwrap();
         let king = BoardPiece::new(piece::BLACK_KING, Position { row: 3, col: 3 });
         let pawn = BoardPiece::new(piece::BLACK_PAWN, pawn_position);
         let board = Board::new(vec![king, pawn]);

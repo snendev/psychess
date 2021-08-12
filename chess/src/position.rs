@@ -1,4 +1,5 @@
 use std::ops::{Add, Sub};
+use std::convert::TryFrom;
 
 use crate::piece::Color;
 
@@ -101,51 +102,13 @@ impl Sub for Position {
     }
 }
 
-pub fn get_index_position(value: i32) -> Position {
-    let col = value % 8;
-    let row = value / 8;
-    Position { row, col }
-}
-
 impl Position {
-    pub fn get_index(&self) -> Result<usize, String> {
-        if self.is_off_board() {
-            let msg = format!("Invalid position: row {} col {}", self.row, self.col);
-            Err(msg)
-        } else {
-            Ok((self.row * 8 + self.col) as usize)
-        }
-    }
-
     pub fn flip(self) -> Result<Position, String> {
         if self.is_off_board() {
             let msg = format!("Invalid position: row {} col {}", self.row, self.col);
             Err(msg)
         } else {
             Ok(Position { row: 7 - self.row, col: 7 - self.col })
-        }
-    }
-
-    pub fn get_key(&self) -> Option<String> {
-        let file = match self.col {
-            0 => Some("a"),
-            1 => Some("b"),
-            2 => Some("c"),
-            3 => Some("d"),
-            4 => Some("e"),
-            5 => Some("f"),
-            6 => Some("g"),
-            7 => Some("h"),
-            _ => None,
-        };
-        if let Some(file) = file {
-            if 0 > self.row || self.row > 7 {
-                None
-            } else {
-                Some(format!("{}{}", file, self.row + 1))
-            }
-        } else {
-            None
         }
     }
 
@@ -158,41 +121,6 @@ impl Position {
             0 => Some(PositionColor::Dark),
             1 => Some(PositionColor::Light),
             _ => None,
-        }
-    }
-
-    pub fn from_key(pgn: &str) -> Result<Self, String> {
-        if pgn.len() > 1 {
-            return Err(format!("invalid pgn `{}`", pgn));
-        }
-        let normalized_pgn = pgn.trim().to_lowercase();
-        let mut characters = normalized_pgn.chars();
-        let file = characters.next();
-        let filenum = match file {
-            Some('a') => Ok(0),
-            Some('b') => Ok(1),
-            Some('c') => Ok(2),
-            Some('d') => Ok(3),
-            Some('e') => Ok(4),
-            Some('f') => Ok(5),
-            Some('g') => Ok(6),
-            Some('h') => Ok(7),
-            Some(x) => Err(format!("invalid column character `{}`", x)),
-            None => Err(format!("incorrect format")),
-        }?;
-
-        let rank = characters.next().unwrap_or('0').to_string().parse::<i32>();
-
-        match rank {
-            Ok(row) => {
-                let position = Position { row, col: filenum };
-                if !position.is_off_board() {
-                    Ok(position)
-                } else {
-                    Err(format!("invalid rank number `{}`", row))
-                }
-            }
-            Err(error) => Err(error.to_string()),
         }
     }
 
@@ -271,6 +199,94 @@ impl Position {
             .filter(|square| !square.is_off_board())
             .collect()
     }
+}
+
+impl From<i32> for Position {
+    fn from(value: i32) -> Self {
+        let col = value % 8;
+        let row = value / 8;
+        Position { row, col }
+    }
+}
+
+impl TryFrom<Position> for i32 {
+    type Error = String;
+
+    fn try_from(position: Position) -> Result<Self, Self::Error> {
+        if position.is_off_board() {
+            let msg = format!("Invalid position: row {} col {}", position.row, position.col);
+            Err(msg)
+        } else {
+            Ok(position.row * 8 + position.col)
+        }
+    }
+}
+
+impl TryFrom<Position> for String {
+    type Error = ();
+
+    fn try_from(position: Position) -> Result<Self, Self::Error> {
+        let file = match position.col {
+            0 => Some("a"),
+            1 => Some("b"),
+            2 => Some("c"),
+            3 => Some("d"),
+            4 => Some("e"),
+            5 => Some("f"),
+            6 => Some("g"),
+            7 => Some("h"),
+            _ => None,
+        };
+        if let Some(file) = file {
+            if 0 > position.row || position.row > 7 {
+                Err(())
+            } else {
+                Ok(format!("{}{}", file, position.row + 1))
+            }
+        } else {
+            Err(())
+        }
+    }
+}
+
+impl TryFrom<String> for Position {
+    type Error = String;
+
+    fn try_from(pgn: String) -> Result<Self, Self::Error> {
+        if pgn.len() > 1 {
+            return Err(format!("invalid pgn `{}`", pgn));
+        }
+        let normalized_pgn = pgn.trim().to_lowercase();
+        let mut characters = normalized_pgn.chars();
+        let file = characters.next();
+        let filenum = match file {
+            Some('a') => Ok(0),
+            Some('b') => Ok(1),
+            Some('c') => Ok(2),
+            Some('d') => Ok(3),
+            Some('e') => Ok(4),
+            Some('f') => Ok(5),
+            Some('g') => Ok(6),
+            Some('h') => Ok(7),
+            Some(x) => Err(format!("invalid column character `{}`", x)),
+            None => Err(format!("incorrect format")),
+        }?;
+
+        let rank = characters.next().unwrap_or('0').to_string().parse::<i32>();
+
+        match rank {
+            Ok(row) => {
+                let position = Position { row, col: filenum };
+                if !position.is_off_board() {
+                    Ok(position)
+                } else {
+                    Err(format!("invalid rank number `{}`", row))
+                }
+            }
+            Err(error) => Err(error.to_string()),
+        }
+    }
+
 }
 
 #[cfg(test)]

@@ -3,8 +3,9 @@ mod board;
 mod piece;
 mod position;
 
-pub use game::{Chess, GameState};
-pub use position::{Position, PositionColor, get_index_position};
+pub use board::{BoardPiece};
+pub use game::{Chess, GameState, Turn};
+pub use position::{Position, PositionColor};
 pub use piece::{
     Piece,
     PieceType,

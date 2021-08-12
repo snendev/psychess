@@ -53,13 +53,13 @@ pub struct Piece {
 
 impl std::fmt::Debug for Piece {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.get_character())
+        write!(f, "{}", char::from(self))
     }
 }
 
 impl std::fmt::Display for Piece {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.get_character())
+        write!(f, "{}", char::from(self))
     }
 }
 
@@ -92,9 +92,11 @@ impl Piece {
     pub fn is_ally(&self, color: Color) -> bool {
         self.color == color
     }
+}
 
-    pub fn get_character(&self) -> char {
-        match (self.piece_type, self.color) {
+impl From<&Piece> for char {
+    fn from(piece: &Piece) -> Self {
+        match (piece.piece_type, piece.color) {
             (PieceType::King, Color::White) => WHITE_KING_CHAR,
             (PieceType::Queen, Color::White) => WHITE_QUEEN_CHAR,
             (PieceType::Rook, Color::White) => WHITE_ROOK_CHAR,

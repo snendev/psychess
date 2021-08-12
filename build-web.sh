@@ -14,7 +14,7 @@ if [ $2 = "1" ]; then
     cargo build
 
     cd ./web/wasm-chess
-    rustwasmc build --no-wasi --target deno --out-dir ../app/api/game/wasm ./
+    rustwasmc build --no-wasi --target deno --out-dir ../app/lib/wasm ./
     cd ..
 
     cd ./app

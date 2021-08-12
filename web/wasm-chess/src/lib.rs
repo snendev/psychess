@@ -1,12 +1,19 @@
-use std::convert::{From, Into, TryInto};
+use std::convert::{From, TryFrom};
 use wasm_bindgen::prelude::*;
 
-use psychess::{Chess, Color, GameState, Piece, PieceType, Position, get_index_position};
+use psychess::{BoardPiece, Chess, Color, GameState, Piece, PieceType, Position, Turn};
 
 #[wasm_bindgen]
 pub struct WasmClient(GameState);
 
 struct PieceRender(Option<Piece>);
+
+impl From<PieceRender> for Option<char> {
+    fn from(piece: PieceRender) -> Self {
+        // evens are white pieces, odds are black pieces
+        piece.0.map(|piece| char::from(&piece))
+    }
+}
 
 impl From<PieceRender> for i32 {
     fn from(piece: PieceRender) -> Self {
@@ -28,53 +35,47 @@ impl From<PieceRender> for i32 {
     }
 }
 
+impl From<i32> for PieceRender {
+    fn from(piece: i32) -> Self {
+        // evens are white pieces, odds are black pieces
+        if piece == 0 {
+            PieceRender(None)
+        } else {
+            let offset = piece - 1;
+            let color = if offset % 2 == 1 { Color::White } else { Color::Black };
+            let piece_type = match offset / 2 {
+                0 => Some(PieceType::Pawn),
+                1 => Some(PieceType::Knight),
+                2 => Some(PieceType::Bishop),
+                3 => Some(PieceType::Rook),
+                4 => Some(PieceType::Queen),
+                5 => Some(PieceType::King),
+                _ => None,
+            };
+            PieceRender(piece_type.map(|p_type| Piece::new(color, p_type)))
+        }
+    }
+}
+
 #[wasm_bindgen]
 struct PositionRender(Position);
 
 impl From<PositionRender> for i32 {
     fn from(position: PositionRender) -> Self {
-        position.0.get_index().unwrap_or(100).try_into().unwrap()
+        i32::try_from(position.0).unwrap_or(-1)
     }
 }
 
 impl From<i32> for PositionRender {
-    fn from(position: i32) -> Self {
-        PositionRender(get_index_position(position))
+    fn from(value: i32) -> Self {
+        PositionRender(Position::from(value))
     }
 }
 
-const WHITE_KING_CHAR: char = '\u{2654}';
-const WHITE_QUEEN_CHAR: char = '\u{2655}';
-const WHITE_ROOK_CHAR: char = '\u{2656}';
-const WHITE_BISHOP_CHAR: char = '\u{2657}';
-const WHITE_KNIGHT_CHAR: char = '\u{2658}';
-const WHITE_PAWN_CHAR: char = '\u{2659}';
-const BLACK_KING_CHAR: char = '\u{265A}';
-const BLACK_QUEEN_CHAR: char = '\u{265B}';
-const BLACK_ROOK_CHAR: char = '\u{265C}';
-const BLACK_BISHOP_CHAR: char = '\u{265D}';
-const BLACK_KNIGHT_CHAR: char = '\u{265E}';
-const BLACK_PAWN_CHAR: char = '\u{265F}';
-
 #[wasm_bindgen]
-pub fn get_piece_from_u32(value: i32) -> String {
-    let adjusted = value + 1;
-    let value = match (adjusted / 2, adjusted % 2) {
-        (1, 0) => Some(WHITE_PAWN_CHAR),
-        (1, 1) => Some(BLACK_PAWN_CHAR),
-        (2, 0) => Some(WHITE_KNIGHT_CHAR),
-        (2, 1) => Some(BLACK_KNIGHT_CHAR),
-        (3, 0) => Some(WHITE_BISHOP_CHAR),
-        (3, 1) => Some(BLACK_BISHOP_CHAR),
-        (4, 0) => Some(WHITE_ROOK_CHAR),
-        (4, 1) => Some(BLACK_ROOK_CHAR),
-        (5, 0) => Some(WHITE_QUEEN_CHAR),
-        (5, 1) => Some(BLACK_QUEEN_CHAR),
-        (6, 0) => Some(WHITE_KING_CHAR),
-        (6, 1) => Some(BLACK_KING_CHAR),
-        (_, _) => None,
-    };
-    if let Some(c) = value {
+pub fn get_piece_from_i32(value: i32) -> String {
+    let maybe_char: Option<char> = PieceRender::from(value).into();
+    if let Some(c) = maybe_char {
         c.to_string()
     } else {
         "".to_string()
@@ -82,9 +83,28 @@ pub fn get_piece_from_u32(value: i32) -> String {
 }
 
 #[wasm_bindgen]
+pub fn create_board(pieces_and_positions: &[i32], is_white_turn: bool) -> WasmClient {
+    // input is actually (piece, position) tuples
+    let pieces: Vec<&i32> = pieces_and_positions.clone().iter().step_by(2).collect();
+    let positions: Vec<&i32> = pieces_and_positions.iter().skip(1).step_by(2).collect();
+
+    let color = if is_white_turn { Color::White } else { Color::Black };
+    let pieces: Vec<BoardPiece> = pieces.iter().zip(positions)
+        .into_iter()
+        .filter_map(|(&&piece, &position)| {
+            let position = PositionRender::from(position).0;
+            let piece = PieceRender::from(piece).0;
+            piece.map(|p| BoardPiece::new(p, position) )
+        })
+        .collect();
+
+    WasmClient(GameState::new(pieces.to_vec(), Turn::new(color)))
+}
+
+#[wasm_bindgen]
 impl WasmClient {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> WasmClient {
+    pub fn new() -> Self {
         WasmClient(GameState::default())
     }
 

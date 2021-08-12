@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 use crate::board::{Board, BoardMove, BoardPiece};
 use crate::piece::{Color, Piece, PieceType};
 use crate::position::Position;
@@ -6,6 +8,10 @@ use crate::position::Position;
 pub struct Turn(Color);
 
 impl Turn {
+    pub fn new(color: Color) -> Self {
+        Turn(color)
+    }
+
     pub fn increment(&mut self) -> Self {
         self.0 = !self.0;
         *self
@@ -87,6 +93,17 @@ impl Default for GameState {
 }
 
 impl GameState {
+    pub fn new(pieces: Vec<BoardPiece>, turn: Turn) -> Self {
+        GameState {
+            board: Board::new(pieces),
+            // TODO: fill with unincluded pieces
+            captured_pieces: vec![],
+            // TODO
+            move_log: vec![],
+            turn,
+        }
+    }
+
     fn get_captured_king_color(&self) -> Option<Color> {
         let dead_king = self
             .captured_pieces
@@ -152,7 +169,7 @@ impl Chess for GameState {
             piece,
             piece.piece.get_color(),
             piece.piece.get_type(),
-            origin.get_key().unwrap(),
+            String::try_from(origin).unwrap(),
         );
         if self.get_turn_color() == piece.piece.get_color() {
             let valid_moves = self.board.get_valid_targets(&piece);
