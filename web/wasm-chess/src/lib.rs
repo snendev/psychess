@@ -3,6 +3,15 @@ use wasm_bindgen::prelude::*;
 
 use psychess::{BoardPiece, Chess, Color, GameState, Piece, PieceType, Position, Turn};
 
+// Code to enable using log("") fn that yields console.log() statements
+//
+// #[wasm_bindgen]
+// extern "C" {
+//     // Use `js_namespace` here to bind `console.log(..)` instead of just `log(..)`
+//     #[wasm_bindgen(js_namespace = console)]
+//     fn log(s: &str);
+// }
+
 #[wasm_bindgen]
 pub struct WasmClient(GameState);
 
@@ -33,7 +42,11 @@ impl From<PieceRender> for i32 {
     fn from(piece: PieceRender) -> Self {
         // evens are white pieces, odds are black pieces
         if let Some(piece) = piece.0 {
-            let color_offset: i32 = if piece.get_color() == Color::White { 0 } else { 1 };
+            let color_offset: i32 = if piece.get_color() == Color::White {
+                0
+            } else {
+                1
+            };
             let piece_type_offset: i32 = match piece.get_type() {
                 PieceType::Pawn => 0,
                 PieceType::Knight => 1,
@@ -56,7 +69,11 @@ impl From<i32> for PieceRender {
             PieceRender(None)
         } else {
             let offset = piece - 1;
-            let color = if offset % 2 == 1 { Color::White } else { Color::Black };
+            let color = if offset % 2 == 0 {
+                Color::White
+            } else {
+                Color::Black
+            };
             let piece_type = match offset / 2 {
                 0 => Some(PieceType::Pawn),
                 1 => Some(PieceType::Knight),
@@ -92,13 +109,19 @@ pub fn create_board(pieces_and_positions: &[i32], is_white_turn: bool) -> WasmCl
     let pieces: Vec<&i32> = pieces_and_positions.clone().iter().step_by(2).collect();
     let positions: Vec<&i32> = pieces_and_positions.iter().skip(1).step_by(2).collect();
 
-    let color = if is_white_turn { Color::White } else { Color::Black };
-    let pieces: Vec<BoardPiece> = pieces.iter().zip(positions)
+    let color = if is_white_turn {
+        Color::White
+    } else {
+        Color::Black
+    };
+    let pieces: Vec<BoardPiece> = pieces
+        .iter()
+        .zip(positions)
         .into_iter()
-        .filter_map(|(&&piece, &position)| {
-            let position = PositionRender::from(position).0;
-            let piece = PieceRender::from(piece).0;
-            piece.map(|p| BoardPiece::new(p, position) )
+        .filter_map(|(&&_piece, &_position)| {
+            let position = PositionRender::from(_position).0;
+            let piece = PieceRender::from(_piece).0;
+            piece.map(|p| BoardPiece::new(p, position))
         })
         .collect();
 
@@ -122,15 +145,15 @@ impl WasmClient {
 
     pub fn get_valid_targets(&self, position: i32) -> Box<[i32]> {
         let origin = PositionRender::from(position).0;
-        let targets = self.0.get_valid_targets(origin);
+        let targets = self.0.get_valid_targets(origin, true);
+
         match targets {
-            Ok(targets) =>
-                targets
-                    .iter()
-                    .map(|p| PositionRender(*p).into())
-                    .collect::<Vec<i32>>()
-                    .into_boxed_slice(),
-            _ => Box::new([])
+            Ok(targets) => targets
+                .iter()
+                .map(|p| PositionRender(*p).into())
+                .collect::<Vec<i32>>()
+                .into_boxed_slice(),
+            _ => Box::new([]),
         }
     }
 
@@ -139,8 +162,7 @@ impl WasmClient {
     }
 
     pub fn render_board(&self) -> Box<[i32]> {
-        self
-            .0
+        self.0
             .get_board()
             .render()
             .iter()
