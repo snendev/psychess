@@ -2,5 +2,6 @@
 
 members = [
     "chess",
+    "terminal",
     "web/wasm-chess",
 ]
