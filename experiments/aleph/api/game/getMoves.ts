@@ -25,7 +25,6 @@ function createPiecePositionSlice(pieces: Board['pieces']): Int32Array {
   const values: number[] = Object.entries(pieces).flatMap(([square, pieceCode]) => {
     const position = getPositionIndex(getPositionFromSquare(square))
     const piece = getPieceIndex(CHESS_PIECE_CODE_TO_CHAR_MAP[pieceCode])
-    console.log({position, piece, square, pieceCode})
     return [piece, position]
   })
   return new Int32Array(values)
