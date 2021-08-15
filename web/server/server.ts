@@ -20,7 +20,11 @@ function handleSocket(socket: WebSocket) {
     foundGame.register(thisClient)
   } else {
     // we have to create a new game client instance
-    const game = new Game(store.makeId())
+    const newId = store.makeId()
+    const game = new Game(
+      newId,
+      () => { store.remove(newId) }
+    )
     game.register(thisClient)
     store.set(game)
     console.log(`${game.id} open!`)

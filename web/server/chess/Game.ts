@@ -19,10 +19,13 @@ export default class Game {
   clients: Client[]
   playerWhite: Client['id'] | null = null
   playerBlack: Client['id'] | null = null
+
+  handleClose: () => void
   
-  constructor(id: string) {
+  constructor(id: string, handleClose: () => void) {
     this.id = id
     this.clients = []
+    this.handleClose = handleClose
     this._instance = new WasmClient()
   }
 
@@ -103,6 +106,24 @@ export default class Game {
     })
     client.socket.addEventListener('message', (event) => {
       this.handleMessage(client, event.data)
+    })
+    client.socket.addEventListener('close', (event) => {
+      const thisClientIndex = this.clients.findIndex((_client) => _client.id === client.id)
+      this.clients.splice(thisClientIndex, 1)
+
+      if (this.clients.length === 0) {
+        this.handleClose()
+      }
+
+      const disconnectedColor = client.id === this.playerWhite
+        ? 'white'
+        : client.id === this.playerBlack
+        ? 'black'
+        : null
+
+      if (disconnectedColor) {
+        this.publish({error: {disconnectedColor}})
+      }
     })
   }
 

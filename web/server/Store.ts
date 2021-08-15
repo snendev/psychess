@@ -30,4 +30,9 @@ export default class Store<T extends {id: string}> {
     const objs: T[] = Object.values(this._data)
     return objs.find(predicate)
   }
+
+  remove(accessor: T['id'] | T) {
+    const id = typeof accessor === 'string' ? accessor : accessor.id
+    delete this._data[id]
+  }
 }
