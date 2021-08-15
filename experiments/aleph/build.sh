@@ -15,11 +15,8 @@ if [ $2 = "1" ]; then
     cargo build
 
     cd ./wasm
-    rustwasmc build --no-wasi --target deno --out-dir ../web/aleph-experimental/api/game/wasm ./
+    wasm-pack build --target bundler --out-dir ../web/aleph-experimental/api/game/wasm ./
     cd ..
-
-    cd ./web/aleph-experimental
-    deno run --allow-read --allow-write prebuild.ts
 
     # reload files for an initial build
     rm -rf .aleph

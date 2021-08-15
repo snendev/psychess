@@ -72,14 +72,37 @@ app.use((ctx, next) => {
   ctx.response.headers.set('Access-Control-Allow-Origin', '*')
   return next()
 })
+
+/**
+ * Finds all static filenames in the /web directory.
+ * 
+ * @param rawpath The path for finding the file in the filesystem.
+ * @param path The output form of the path by which resources are queried.
+ * @returns An array of file paths to allow in static file requests.
+ */
+function getStaticFileNames(rawpath: string, path: string): string[] {
+  return Array.from(Deno.readDirSync(rawpath)).flatMap(
+    ({isDirectory, isFile, name}) => {
+      if (isDirectory) {
+        return getStaticFileNames(`${rawpath}/${name}`, `${path}/${name}`)
+      }
+      if (isFile) return [`${path}/${name}`]
+      return []
+    }
+  )
+}
+
 // handle static routes to web resources
 app.use(async (ctx, next) => {
   // retrieve files in web/ directory
-  // if (fileWhitelist.includes(filePath)) {
-  //   await send(ctx, filePath, {
-  //     root: `${Deno.cwd()}/public`,
-  //   });
-  // }
+  const staticFileAllowList = getStaticFileNames('./public', '')
+
+  const filePath = ctx.request.url.pathname === '/' ? '/index.html' : ctx.request.url.pathname
+  if (staticFileAllowList.includes(filePath)) {
+    await send(ctx, filePath, {
+      root: `${Deno.cwd()}/public`,
+    });
+  }
 })
 app.use(apiRouter.routes())
 app.use(apiRouter.allowedMethods())
