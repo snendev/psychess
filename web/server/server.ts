@@ -1,4 +1,4 @@
-import { Application, Router, Status } from 'oak'
+import { Application, Router, Status, send } from 'oak'
 
 import Game from '~/chess/Game.ts'
 import getMoves from '~/chess/getMoves.ts'
@@ -7,7 +7,7 @@ import Store from './Store.ts'
 
 const port = +(Deno.env.get('PORT') ?? 8080)
 
-const router = new Router()
+const apiRouter = new Router()
 
 function handleSocket(socket: WebSocket) {
   const foundGame = store.find((game) => game.status === 'open')
@@ -31,7 +31,7 @@ function handleSocket(socket: WebSocket) {
   }
 }
 
-router
+apiRouter
   .get('/', (context) => {
     context.response.body = "Hello world!"
   })
@@ -56,12 +56,33 @@ const store = new Store<Game>("id")
 
 const app = new Application()
 
+app.addEventListener("error", (event) => {
+  console.error(event.error);
+})
+
+app.use(async (ctx, next) => {
+  try {
+    await next();
+  } catch (error) {
+    ctx.response.body = "Internal server error";
+    throw error;
+  }
+});
 app.use((ctx, next) => {
   ctx.response.headers.set('Access-Control-Allow-Origin', '*')
   return next()
 })
-app.use(router.routes())
-app.use(router.allowedMethods())
+// handle static routes to web resources
+app.use(async (ctx, next) => {
+  // retrieve files in web/ directory
+  // if (fileWhitelist.includes(filePath)) {
+  //   await send(ctx, filePath, {
+  //     root: `${Deno.cwd()}/public`,
+  //   });
+  // }
+})
+app.use(apiRouter.routes())
+app.use(apiRouter.allowedMethods())
 
 // 404
 app.use((context) => {
