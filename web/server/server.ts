@@ -1,5 +1,6 @@
 import { Application, Router, Status, send } from 'oak'
 
+import init from '~/chess/wasm/wasm_chess.js'
 import Game from '~/chess/Game.ts'
 import getMoves from '~/chess/getMoves.ts'
 
@@ -99,11 +100,15 @@ app.use(async (ctx, next) => {
 
   const filePath = ctx.request.url.pathname === '/' ? '/index.html' : ctx.request.url.pathname
   if (staticFileAllowList.includes(filePath)) {
+    console.log(`Serving static file: ${filePath}`)
     await send(ctx, filePath, {
       root: `${Deno.cwd()}/public`,
     });
+  } else {
+    return next()
   }
 })
+
 app.use(apiRouter.routes())
 app.use(apiRouter.allowedMethods())
 
@@ -114,5 +119,8 @@ app.use((context) => {
 })
 
 console.log(`Listening on port ${port}...`)
+
+// https://github.com/rustwasm/wasm-pack/issues/672#issuecomment-813630435
+await init(Deno.readFileSync('./chess/wasm/wasm_chess_bg.wasm'))
 
 await app.listen({ port })
