@@ -10,6 +10,7 @@ wasm-pack build --target bundler --out-dir ../web/app/src/chess/wasm ./
 cd ../web
 
 cd ./app
+npm i
 npm run build
 cd ..
 
