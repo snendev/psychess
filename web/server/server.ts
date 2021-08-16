@@ -1,8 +1,8 @@
 import { Application, Router, Status, send } from './deps.ts'
 
-import init from '~/chess/wasm/wasm_chess.js'
-import Game from '~/chess/Game.ts'
-import getMoves from '~/chess/getMoves.ts'
+import init from './chess/wasm/wasm_chess.js'
+import Game from './chess/Game.ts'
+import getMoves from './chess/getMoves.ts'
 
 import Store from './Store.ts'
 
