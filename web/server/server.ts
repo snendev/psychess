@@ -1,5 +1,4 @@
 import { Application, Router, Status } from './deps.ts'
-import { proxyMiddleware } from './deps.ts'
 import { contentType } from './deps.ts'
 
 import init from './chess/wasm/wasm_chess.js'
@@ -124,36 +123,30 @@ app.use(apiRouter.routes())
 app.use(apiRouter.allowedMethods())
 
 // where this file is imported, except ./public
-const PUBLIC_PATH = (function () {
+const ASSET_URL = (function () {
   const splitUrl = import.meta.url.split('/')
   const root = splitUrl.slice(0, splitUrl.length - 1).join('/')
   return `${root}/public`
 })()
 
 // handle static routes by proxying to web resources
-app.use(
-  // TODO
-  proxyMiddleware(PUBLIC_PATH, {
-    filterReq: (request) => {
-      const pathname = request.url.pathname === '/' ? '/index.html' : request.url.pathname
-      return !STATIC_FILE_PATHS.includes(pathname)
-    },
-    proxyReqUrlDecorator: (url, request) => {
-      const pathname = request.url.pathname === '/' ? '/index.html' : request.url.pathname
-      url.pathname = `${url.pathname}${pathname}`
-      return url
-    },
-    srcResHeaderDecorator: (headers, request) => {
-      const pathname = request.url.pathname === '/' ? '/index.html' : request.url.pathname
-      let headerValue = contentType(pathname)
-      if (pathname.endsWith('.html')) {
-        headerValue = "text/html; charset=UTF-8"
-      }
-      if (headerValue) headers.set("Content-Type", headerValue)
-      return headers
-    }
-  })
-)
+// https://deno.com/deploy/docs/serve-static-assets
+app.use(async (ctx, next) => {
+  const { url } = ctx.request
+  const pathname = url.pathname === '/' ? '/index.html' : url.pathname
+  const isKnownStaticFile = !STATIC_FILE_PATHS.includes(pathname)
+  if (!isKnownStaticFile) {
+    return await next()
+  }
+  const assetURL = `${ASSET_URL}${pathname}`
+  const response = await fetch(assetURL)
+  const contentTypeValue = contentType(pathname)
+  const headers = new Headers(response.headers)
+  if (contentTypeValue) {
+    headers.set('Content-Type', contentTypeValue)
+  }
+  return new Response(response.body, {...response, headers})
+})
 
 // 404
 app.use((context) => {
