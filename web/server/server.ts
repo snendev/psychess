@@ -133,9 +133,8 @@ const ASSET_URL = (function () {
 app.use(async (ctx, next) => {
   const { url } = ctx.request
   const pathname = url.pathname === '/' ? '/index.html' : url.pathname
-  const isKnownStaticFile = !STATIC_FILE_PATHS.includes(pathname)
+  const isKnownStaticFile = STATIC_FILE_PATHS.includes(pathname)
   const assetURL = `${ASSET_URL}${pathname}`
-  console.log({assetURL, isKnownStaticFile, STATIC_FILE_PATHS, pathname})
   if (!isKnownStaticFile) {
     return await next()
   }
