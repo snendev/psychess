@@ -135,6 +135,7 @@ app.use(
   proxyMiddleware(PUBLIC_PATH, {
     filterReq: (request) => {
       const pathname = request.url.pathname === '/' ? '/index.html' : request.url.pathname
+      console.log(pathname)
       return !STATIC_FILE_PATHS.includes(pathname)
     },
     proxyReqUrlDecorator: (url, request) => {
@@ -145,7 +146,6 @@ app.use(
     srcResHeaderDecorator: (headers, request) => {
       const pathname = request.url.pathname === '/' ? '/index.html' : request.url.pathname
       let headerValue = contentType(pathname)
-      console.log({headerValue})
       if (pathname.endsWith('.html')) {
         headerValue = "text/html; charset=UTF-8"
       }
