@@ -71,7 +71,6 @@ app.use(async (ctx, next) => {
 });
 app.use((ctx, next) => {
   ctx.response.headers.set('Access-Control-Allow-Origin', '*')
-  console.log(ctx)
   return next()
 })
 
@@ -135,10 +134,11 @@ app.use(async (ctx, next) => {
   const { url } = ctx.request
   const pathname = url.pathname === '/' ? '/index.html' : url.pathname
   const isKnownStaticFile = !STATIC_FILE_PATHS.includes(pathname)
+  const assetURL = `${ASSET_URL}${pathname}`
+  console.log({assetURL, isKnownStaticFile})
   if (!isKnownStaticFile) {
     return await next()
   }
-  const assetURL = `${ASSET_URL}${pathname}`
   const response = await fetch(assetURL)
   const contentTypeValue = contentType(pathname)
   const headers = new Headers(response.headers)
