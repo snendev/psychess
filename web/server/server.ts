@@ -144,8 +144,11 @@ app.use(
     },
     srcResHeaderDecorator: (headers, request) => {
       const pathname = request.url.pathname === '/' ? '/index.html' : request.url.pathname
-      const headerValue = contentType(pathname)
+      let headerValue = contentType(pathname)
       console.log({headerValue})
+      if (pathname.endsWith('.html')) {
+        headerValue = "text/html; charset=UTF-8"
+      }
       if (headerValue) headers.set("Content-Type", headerValue)
       return headers
     }
