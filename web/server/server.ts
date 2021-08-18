@@ -1,10 +1,14 @@
-import { Application, Router, Status, send } from './deps.ts'
+import { Application, Router, Status } from './deps.ts'
+import { proxyMiddleware } from './deps.ts'
+// import { contentType } from './deps.ts'
 
 import init from './chess/wasm/wasm_chess.js'
 import Game from './chess/Game.ts'
 import getMoves from './chess/getMoves.ts'
 
 import Store from './Store.ts'
+
+const authToken = Deno.env.get('GITHUB_SECRET')
 
 const port = +(Deno.env.get('PORT') ?? 8080)
 
@@ -33,9 +37,6 @@ function handleSocket(socket: WebSocket) {
 }
 
 apiRouter
-  .get('/', (context) => {
-    context.response.body = "Hello world!"
-  })
   .get('/api/ws', async (context) => {
     if (!context.isUpgradable) throw new Error('Context not upgradable.')
     if (context.request.headers.get('connection') === 'keep-alive, Upgrade') {
@@ -74,43 +75,81 @@ app.use((ctx, next) => {
   return next()
 })
 
-/**
- * Finds all static filenames in the /web directory.
- * 
- * @param rawpath The path for finding the file in the filesystem.
- * @param path The output form of the path by which resources are queried.
- * @returns An array of file paths to allow in static file requests.
- */
-function getStaticFileNames(rawpath: string, path: string): string[] {
-  return Array.from(Deno.readDirSync(rawpath)).flatMap(
-    ({isDirectory, isFile, name}) => {
-      if (isDirectory) {
-        return getStaticFileNames(`${rawpath}/${name}`, `${path}/${name}`)
-      }
-      if (isFile) return [`${path}/${name}`]
-      return []
-    }
-  )
+interface GithubTree {
+  tree: {
+    path: string
+    type: string
+    url: string
+  }[]
 }
 
-// handle static routes to web resources
-app.use(async (ctx, next) => {
-  // retrieve files in web/ directory
-  const staticFileAllowList = getStaticFileNames('./public', '')
+async function traverseGithubTree(tree: GithubTree, path: string[]): Promise<GithubTree> {
+  if (path.length === 0) return tree
+  const maybeFile = tree.tree.find((file) => file.path === path[0])
+  if (!maybeFile) throw new Error(`Cannot find ${JSON.stringify({path})}`)
+  const {url} = maybeFile
+  const nextTree = await (await fetch(`${url}?access_token=${authToken}`)).json()
+  return await traverseGithubTree(nextTree, path.slice(1))
+}
 
-  const filePath = ctx.request.url.pathname === '/' ? '/index.html' : ctx.request.url.pathname
-  if (staticFileAllowList.includes(filePath)) {
-    console.log(`Serving static file: ${filePath}`)
-    await send(ctx, filePath, {
-      root: `${Deno.cwd()}/public`,
-    });
-  } else {
-    return next()
-  }
-})
+// TODO recurse and grab all the file path names to allow
+async function getFileNames(directory: GithubTree, node: string): Promise<string[]> {
+  const filenames = await Promise.all(
+    directory.tree.map(async ({path, type, url}) => {
+      const newPath = `${node}/${path}`
+      if (type === 'tree') {
+        const data = await (await fetch(`${url}?access_token=${authToken}`)).json()
+        return await getFileNames(data, newPath)
+      }
+      return [newPath]
+    })
+  )
+  return filenames.flatMap((arr) => arr)
+}
 
+async function getStaticFileAllowList() {
+  const deployBranch = await (await fetch(
+    `https://api.github.com/repos/sullivansean27/psychess/branches/deploy?access_token=${authToken}`
+  )).json()
+
+  const treeUrl = deployBranch.commit.commit.tree.url
+  const treeFiles = await (await fetch(`${treeUrl}?access_token=${authToken}`)).json()
+  const staticDirectory = await traverseGithubTree(treeFiles, ['web', 'server', 'public'])
+  return await getFileNames(staticDirectory, '')
+}
+
+const STATIC_FILE_PATHS = await getStaticFileAllowList()
 app.use(apiRouter.routes())
 app.use(apiRouter.allowedMethods())
+
+// where this file is imported, except ./public
+const PUBLIC_PATH = (function () {
+  const splitUrl = import.meta.url.split('/')
+  const root = splitUrl.slice(0, splitUrl.length - 1).join('/')
+  return `${root}/public`
+})()
+
+// handle static routes by proxying to web resources
+app.use(
+  // TODO
+  proxyMiddleware(PUBLIC_PATH, {
+    filterReq: (request) => {
+      const pathname = request.url.pathname === '/' ? '/index.html' : request.url.pathname
+      return !STATIC_FILE_PATHS.includes(pathname)
+    },
+    proxyReqUrlDecorator: (url, request) => {
+      const pathname = request.url.pathname === '/' ? '/index.html' : request.url.pathname
+      url.pathname = `${url.pathname}${pathname}`
+      return url
+    },
+    srcResHeaderDecorator: (headers, request) => {
+      const pathname = request.url.pathname === '/' ? '/index.html' : request.url.pathname
+      // const headerValue = contentType(pathname)
+      // if (headerValue) headers.set("Content-Type", headerValue)
+      return headers
+    }
+  })
+)
 
 // 404
 app.use((context) => {
@@ -120,7 +159,10 @@ app.use((context) => {
 
 console.log(`Listening on port ${port}...`)
 
+// https://deno.com/deploy/docs/serve-static-assets
+const wasmURL = new URL('chess/wasm/wasm_chess_bg.wasm', import.meta.url)
 // https://github.com/rustwasm/wasm-pack/issues/672#issuecomment-813630435
-await init(Deno.readFileSync('./chess/wasm/wasm_chess_bg.wasm'))
+await init(fetch(`${wasmURL}?access_token=${authToken}` ))
 
-await app.listen({ port })
+// https://oakserver.github.io/oak/deploy#Handling_requests
+addEventListener("fetch", app.fetchEventHandler());
