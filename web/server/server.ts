@@ -72,6 +72,7 @@ app.use(async (ctx, next) => {
 });
 app.use((ctx, next) => {
   ctx.response.headers.set('Access-Control-Allow-Origin', '*')
+  console.log(ctx)
   return next()
 })
 
@@ -135,7 +136,6 @@ app.use(
   proxyMiddleware(PUBLIC_PATH, {
     filterReq: (request) => {
       const pathname = request.url.pathname === '/' ? '/index.html' : request.url.pathname
-      console.log(pathname)
       return !STATIC_FILE_PATHS.includes(pathname)
     },
     proxyReqUrlDecorator: (url, request) => {
