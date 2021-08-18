@@ -135,7 +135,7 @@ app.use(async (ctx, next) => {
   const pathname = url.pathname === '/' ? '/index.html' : url.pathname
   const isKnownStaticFile = !STATIC_FILE_PATHS.includes(pathname)
   const assetURL = `${ASSET_URL}${pathname}`
-  console.log({assetURL, isKnownStaticFile})
+  console.log({assetURL, isKnownStaticFile, STATIC_FILE_PATHS, pathname})
   if (!isKnownStaticFile) {
     return await next()
   }
