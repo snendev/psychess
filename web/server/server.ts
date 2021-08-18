@@ -134,16 +134,17 @@ app.use(async (ctx, next) => {
   const { url } = ctx.request
   const pathname = url.pathname === '/' ? '/index.html' : url.pathname
   const isKnownStaticFile = STATIC_FILE_PATHS.includes(pathname)
-  const assetURL = `${ASSET_URL}${pathname}`
   if (!isKnownStaticFile) {
     return await next()
   }
+  const assetURL = `${ASSET_URL}${pathname}`
   const response = await fetch(assetURL)
   const contentTypeValue = contentType(pathname)
   const headers = new Headers(response.headers)
   if (contentTypeValue) {
     headers.set('Content-Type', contentTypeValue)
   }
+  console.log({assetURL, headers})
   return new Response(response.body, {...response, headers})
 })
 
