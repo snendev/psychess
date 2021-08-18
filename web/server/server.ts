@@ -1,6 +1,6 @@
 import { Application, Router, Status } from './deps.ts'
 import { proxyMiddleware } from './deps.ts'
-// import { contentType } from './deps.ts'
+import { contentType } from './deps.ts'
 
 import init from './chess/wasm/wasm_chess.js'
 import Game from './chess/Game.ts'
@@ -144,8 +144,8 @@ app.use(
     },
     srcResHeaderDecorator: (headers, request) => {
       const pathname = request.url.pathname === '/' ? '/index.html' : request.url.pathname
-      // const headerValue = contentType(pathname)
-      // if (headerValue) headers.set("Content-Type", headerValue)
+      const headerValue = contentType(pathname)
+      if (headerValue) headers.set("Content-Type", headerValue)
       return headers
     }
   })
