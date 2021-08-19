@@ -159,7 +159,7 @@ app.use(async (ctx, next) => {
   if (pathname.endsWith('.html')) {
     headers.set(
       'Content-Security-Policy',
-      `default-src 'self' https://raw.githubusercontent.com; script-src 'self';`,
+      `default-src 'self' https://raw.githubusercontent.com; script-src 'self'; connect-src 'self'`,
     )
   }
   ctx.response.headers = headers
