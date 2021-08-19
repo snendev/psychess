@@ -150,7 +150,9 @@ app.use(async (ctx, next) => {
   if (contentTypeValue) {
     headers.set('Content-Type', contentTypeValue)
   }
-  return new Response(data, {status: response.status, headers})
+  ctx.response.headers = headers
+  ctx.response.body = response.body
+  ctx.response.status = response.status
 })
 
 // 404
