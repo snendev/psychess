@@ -140,6 +140,8 @@ app.use(async (ctx, next) => {
   }
   const assetURL = `${ASSET_URL}${pathname}`
   const response = await fetch(assetURL)
+  const data = await response.text()
+  console.log(data)
   // get just the last bit so we can determine the correct filetype
   // contentType from media-types@v2.10.0 checks path.includes('/')
   const filePathParts = pathname.split('/')
@@ -149,7 +151,7 @@ app.use(async (ctx, next) => {
     headers.set('Content-Type', contentTypeValue)
   }
   console.log({assetURL, contentTypeValue, headers, res_status: response.status})
-  return new Response(response.body, {...response, headers})
+  return new Response(data, {...response, headers})
 })
 
 // 404
