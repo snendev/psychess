@@ -147,7 +147,7 @@ app.use(async (ctx, next) => {
   if (contentTypeValue) {
     headers.set('Content-Type', contentTypeValue)
   }
-  console.log({assetURL, contentTypeValue, pathname, headers})
+  console.log({assetURL, contentTypeValue, pathname, headers, res: response.body})
   return new Response(response.body, {...response, headers})
 })
 
