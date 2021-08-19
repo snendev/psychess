@@ -150,8 +150,7 @@ app.use(async (ctx, next) => {
   if (contentTypeValue) {
     headers.set('Content-Type', contentTypeValue)
   }
-  console.log({assetURL, contentTypeValue, headers, res_status: response.status})
-  return new Response(data, {...response, headers})
+  return new Response(data, {status: response.status, headers})
 })
 
 // 404
