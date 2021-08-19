@@ -134,6 +134,7 @@ app.use(async (ctx, next) => {
   const { url } = ctx.request
   const pathname = url.pathname === '/' ? '/index.html' : url.pathname
   const isKnownStaticFile = STATIC_FILE_PATHS.includes(pathname)
+  console.log({isKnownStaticFile, pathname})
   if (!isKnownStaticFile) {
     return await next()
   }
@@ -147,7 +148,7 @@ app.use(async (ctx, next) => {
   if (contentTypeValue) {
     headers.set('Content-Type', contentTypeValue)
   }
-  console.log({assetURL, contentTypeValue, pathname, headers, res: response.status})
+  console.log({assetURL, contentTypeValue, headers, res_status: response.status})
   return new Response(response.body, {...response, headers})
 })
 
