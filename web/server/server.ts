@@ -156,7 +156,7 @@ app.use(async (ctx, next) => {
   if (contentTypeValue) {
     headers.set('Content-Type', contentTypeValue)
   }
-  if (pathname.endsWith(',js') || pathname.endsWith('.html')) {
+  if (pathname.endsWith('.html')) {
     headers.set(
       'Content-Security-Policy',
       `default-src 'self' https://raw.githubusercontent.com; script-src 'self';`,
