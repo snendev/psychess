@@ -139,7 +139,10 @@ app.use(async (ctx, next) => {
   }
   const assetURL = `${ASSET_URL}${pathname}`
   const response = await fetch(assetURL)
-  const contentTypeValue = contentType(pathname)
+  // get just the last bit so we can determine the correct filetype
+  // contentType from media-types@v2.10.0 checks path.includes('/')
+  const filePathParts = pathname.split('/')
+  const contentTypeValue = contentType(filePathParts[filePathParts.length - 1])
   const headers = new Headers(response.headers)
   if (contentTypeValue) {
     headers.set('Content-Type', contentTypeValue)
