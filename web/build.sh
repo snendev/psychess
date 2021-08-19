@@ -11,11 +11,13 @@ cd ../web
 
 cd ./app
 npm i
-npm run build
-cd ..
 
-cp -r ./app/build ./server/public
+# to avoid CSP issues
+INLINE_RUNTIME_CHUNK=false npm run build
 
 echo ""
 echo "Build complete!"
 echo "Run $ ./server/serve.sh to run the application."
+
+cd ../server
+GITHUB_SECRET=$GITHUB_SECRET LOG_LEVEL=debug deployctl run server.ts --no-check

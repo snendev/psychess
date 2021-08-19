@@ -82,12 +82,19 @@ interface GithubTree {
   }[]
 }
 
+async function makeRequest(url: URL | string, headers?: Headers): Promise<Response> {
+  const urlObj = url instanceof URL ? url : new URL(url)
+  return await fetch(urlObj, {
+    headers: { ...(headers ?? {}), Authorization: `token ${authToken}` },
+  })
+}
+
 async function traverseGithubTree(tree: GithubTree, path: string[]): Promise<GithubTree> {
   if (path.length === 0) return tree
   const maybeFile = tree.tree.find((file) => file.path === path[0])
   if (!maybeFile) throw new Error(`Cannot find ${JSON.stringify({path})}`)
   const {url} = maybeFile
-  const nextTree = await (await fetch(`${url}?access_token=${authToken}`)).json()
+  const nextTree = await (await makeRequest(url)).json()
   return await traverseGithubTree(nextTree, path.slice(1))
 }
 
@@ -97,7 +104,7 @@ async function getFileNames(directory: GithubTree, node: string): Promise<string
     directory.tree.map(async ({path, type, url}) => {
       const newPath = `${node}/${path}`
       if (type === 'tree') {
-        const data = await (await fetch(`${url}?access_token=${authToken}`)).json()
+        const data = await (await makeRequest(url)).json()
         return await getFileNames(data, newPath)
       }
       return [newPath]
@@ -107,22 +114,22 @@ async function getFileNames(directory: GithubTree, node: string): Promise<string
 }
 
 async function getStaticFileAllowList() {
-  const deployBranch = await (await fetch(
-    `https://api.github.com/repos/sullivansean27/psychess/branches/deploy?access_token=${authToken}`
-  )).json()
+  const url = `https://api.github.com/repos/sullivansean27/psychess/branches/deploy`
+  const deployBranch = await (await makeRequest(url)).json()
 
   const treeUrl = deployBranch.commit.commit.tree.url
-  const treeFiles = await (await fetch(`${treeUrl}?access_token=${authToken}`)).json()
+  const treeFiles = await (await makeRequest(treeUrl)).json()
   const staticDirectory = await traverseGithubTree(treeFiles, ['web', 'server', 'public'])
   return await getFileNames(staticDirectory, '')
 }
 
 const STATIC_FILE_PATHS = await getStaticFileAllowList()
-app.use(apiRouter.routes())
-app.use(apiRouter.allowedMethods())
 
 // where this file is imported, except ./public
 const ASSET_URL = (function () {
+  if (import.meta.url.startsWith('file://')) {
+    return `https://raw.githubusercontent.com/sullivansean27/psychess/deploy/web/server/public`
+  }
   const splitUrl = import.meta.url.split('/')
   const root = splitUrl.slice(0, splitUrl.length - 1).join('/')
   return `${root}/public`
@@ -134,12 +141,13 @@ app.use(async (ctx, next) => {
   const { url } = ctx.request
   const pathname = url.pathname === '/' ? '/index.html' : url.pathname
   const isKnownStaticFile = STATIC_FILE_PATHS.includes(pathname)
-  console.log({isKnownStaticFile, pathname})
   if (!isKnownStaticFile) {
     return await next()
   }
   const assetURL = `${ASSET_URL}${pathname}`
-  const response = await fetch(assetURL)
+  console.log(assetURL)
+  const response = await makeRequest(assetURL)
+
   // get just the last bit so we can determine the correct filetype
   // contentType from media-types@v2.10.0 checks path.includes('/')
   const filePathParts = pathname.split('/')
@@ -148,10 +156,19 @@ app.use(async (ctx, next) => {
   if (contentTypeValue) {
     headers.set('Content-Type', contentTypeValue)
   }
+  if (pathname.endsWith(',js') || pathname.endsWith('.html')) {
+    headers.set(
+      'Content-Security-Policy',
+      `default-src 'self' https://raw.githubusercontent.com; script-src 'self';`,
+    )
+  }
   ctx.response.headers = headers
   ctx.response.body = response.body
   ctx.response.status = response.status
 })
+
+app.use(apiRouter.routes())
+app.use(apiRouter.allowedMethods())
 
 // 404
 app.use((context) => {
@@ -164,7 +181,7 @@ console.log(`Listening on port ${port}...`)
 // https://deno.com/deploy/docs/serve-static-assets
 const wasmURL = new URL('chess/wasm/wasm_chess_bg.wasm', import.meta.url)
 // https://github.com/rustwasm/wasm-pack/issues/672#issuecomment-813630435
-await init(fetch(`${wasmURL}?access_token=${authToken}` ))
+await init(makeRequest(wasmURL))
 
 // https://oakserver.github.io/oak/deploy#Handling_requests
 addEventListener("fetch", app.fetchEventHandler());
