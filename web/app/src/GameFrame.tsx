@@ -1,7 +1,7 @@
 import React from 'react'
 
-import useGame from './useGame'
-import ChessBoard from './ChessBoard'
+import useGame from './chess/useGame.ts'
+import ChessBoard from './ChessBoard.tsx'
 
 function Connecting(): JSX.Element {
   return (

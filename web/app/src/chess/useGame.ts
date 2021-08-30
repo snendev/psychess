@@ -1,8 +1,8 @@
 import React from 'react'
 import useWebSocket from 'react-use-websocket'
 
-import {Board, Position} from './board'
-import {Color} from './pieces'
+import {Board, Position} from './board.ts'
+import {Color} from './pieces.ts'
 
 function shouldReconnect() {
   console.log('Reconnecting...')

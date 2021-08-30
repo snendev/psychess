@@ -4,18 +4,16 @@ cd ../
 cargo build
 
 cd ./wasm
-# https://github.com/rustwasm/wasm-pack/issues/672#issuecomment-813630435
-wasm-pack build --target web --out-dir ../web/server/chess/wasm ./
-wasm-pack build --target bundler --out-dir ../web/app/src/chess/wasm ./
-cd ../web
+./build.sh
+cd ..
 
-cd ./app
-npm i
-npm run build
+cd ./web/app
+./build.sh
+cd ../..
 
 echo ""
 echo "Build complete!"
 echo "Run $ ./server/serve.sh to run the application."
 
-cd ../server
-GITHUB_SECRET=$GITHUB_SECRET LOG_LEVEL=debug deployctl run server.ts --no-check
+cd ./web/server
+./serve.sh
