@@ -11,9 +11,7 @@ cd ../web
 
 cd ./app
 npm i
-
-# to avoid CSP issues
-INLINE_RUNTIME_CHUNK=false npm run build
+npm run build
 
 echo ""
 echo "Build complete!"

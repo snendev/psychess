@@ -71,6 +71,7 @@ app.use(async (ctx, next) => {
 });
 app.use((ctx, next) => {
   ctx.response.headers.set('Access-Control-Allow-Origin', '*')
+  // avoid CSP concerns
   ctx.response.headers.delete("content-security-policy");
   return next()
 })
@@ -146,7 +147,7 @@ app.use(async (ctx, next) => {
     return await next()
   }
   const assetURL = `${ASSET_URL}${pathname}`
-  console.log(assetURL)
+  console.log(`${url} => ${assetURL}`)
   const response = await makeRequest(assetURL)
 
   // get just the last bit so we can determine the correct filetype
