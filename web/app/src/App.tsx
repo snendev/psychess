@@ -1,7 +1,7 @@
 import React from 'react';
-import './App.css';
 
-import GameFrame from './chess/GameFrame'
+import GameFrame from './GameFrame.tsx'
+import './App.css';
 
 function App() {
   return (

@@ -1,0 +1,677 @@
+{
+  "graph": {
+    "src/index.tsx": [
+      {
+        "input": "src/index.tsx",
+        "output": "../server/public/index.js",
+        "dependencies": {
+          "https://esm.sh/react@17": {
+            "Import": {
+              "defaults": [
+                "React"
+              ]
+            }
+          },
+          "https://esm.sh/react-dom@17": {
+            "Import": {
+              "defaults": [
+                "ReactDOM"
+              ]
+            }
+          },
+          "src/App.tsx": {
+            "Import": {
+              "defaults": [
+                "App"
+              ]
+            }
+          },
+          "src/wasm/wasm_chess.js": {
+            "Import": {
+              "defaults": [
+                "initWasm"
+              ]
+            }
+          },
+          "src/index.css": {
+            "Import": {}
+          }
+        },
+        "export": {},
+        "type": "Import"
+      }
+    ],
+    "https://esm.sh/react@17": [
+      {
+        "input": "https://esm.sh/react@17",
+        "output": "dist/deps/64cac43394675e8786158e6227c0c09e73e0efea2f9b0532f3055b36921f8028.js",
+        "dependencies": {
+          "https://cdn.esm.sh/v46/react@17.0.2/deno/react.js": {
+            "Import": {
+              "namespaces": [
+                "*"
+              ],
+              "specifiers": {
+                "default": "default"
+              }
+            }
+          }
+        },
+        "export": {
+          "namespaces": [
+            "https://cdn.esm.sh/v46/react@17.0.2/deno/react.js"
+          ],
+          "specifiers": {
+            "default": "default"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod"
+      }
+    ],
+    "https://esm.sh/react-dom@17": [
+      {
+        "input": "https://esm.sh/react-dom@17",
+        "output": "dist/deps/17838b4d37d38038782f14108bee99de937c2cc7a944d2d2a3990d9a7fd9e485.js",
+        "dependencies": {
+          "https://cdn.esm.sh/v46/react-dom@17.0.2/deno/react-dom.js": {
+            "Import": {
+              "namespaces": [
+                "*"
+              ],
+              "specifiers": {
+                "default": "default"
+              }
+            }
+          }
+        },
+        "export": {
+          "namespaces": [
+            "https://cdn.esm.sh/v46/react-dom@17.0.2/deno/react-dom.js"
+          ],
+          "specifiers": {
+            "default": "default"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod1"
+      }
+    ],
+    "src/App.tsx": [
+      {
+        "input": "src/App.tsx",
+        "output": "dist/deps/26ad4b834941d9b19ebf9db8082bd202aaf72ea0ddea85f5a8a0cb3c729cc6f2.js",
+        "dependencies": {
+          "https://esm.sh/react@17": {
+            "Import": {
+              "defaults": [
+                "React"
+              ]
+            }
+          },
+          "src/GameFrame.tsx": {
+            "Import": {
+              "defaults": [
+                "GameFrame"
+              ]
+            }
+          },
+          "src/App.css": {
+            "Import": {}
+          }
+        },
+        "export": {
+          "default": "App"
+        },
+        "type": "Import",
+        "importSpecifier": "mod2"
+      }
+    ],
+    "src/wasm/wasm_chess.js": [
+      {
+        "input": "src/wasm/wasm_chess.js",
+        "output": "dist/deps/cd1b446900e3e12ca5849064edb333898b6116f2a0fcc4284bb080ed41e14f53.js",
+        "dependencies": {},
+        "export": {
+          "specifiers": {
+            "get_piece_from_i32": "get_piece_from_i32",
+            "get_piece_index_from_character": "get_piece_index_from_character",
+            "create_board": "create_board",
+            "WasmClient": "WasmClient"
+          },
+          "default": "init"
+        },
+        "type": "Import",
+        "importSpecifier": "mod3"
+      }
+    ],
+    "src/index.css": [
+      {
+        "input": "src/index.css",
+        "output": "dist/deps/85da366246340e911d7a0eb9153e64137a1b31f0686c74d9aef9ae4f032cb09e.css",
+        "export": {},
+        "dependencies": {},
+        "type": "Import",
+        "importSpecifier": "mod4"
+      }
+    ],
+    "https://cdn.esm.sh/v46/react@17.0.2/deno/react.js": [
+      {
+        "input": "https://cdn.esm.sh/v46/react@17.0.2/deno/react.js",
+        "output": "dist/deps/d13d8a5e9212b0707dd537fa6fb3b75ebcedb703713d5010254383128e82a954.js",
+        "dependencies": {
+          "https://cdn.esm.sh/v46/object-assign@4.1.1/deno/object-assign.js": {
+            "Import": {
+              "defaults": [
+                "__object_assign$"
+              ]
+            }
+          }
+        },
+        "export": {
+          "specifiers": {
+            "Children": "ye",
+            "Component": "de",
+            "Fragment": "fe",
+            "Profiler": "pe",
+            "PureComponent": "_e",
+            "StrictMode": "le",
+            "Suspense": "ae",
+            "__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED": "ve",
+            "cloneElement": "me",
+            "createContext": "he",
+            "createElement": "Ee",
+            "createFactory": "Se",
+            "createRef": "Ce",
+            "default": "export_default",
+            "forwardRef": "Re",
+            "isValidElement": "ke",
+            "lazy": "$e",
+            "memo": "ge",
+            "useCallback": "je",
+            "useContext": "Oe",
+            "useDebugValue": "Pe",
+            "useEffect": "xe",
+            "useImperativeHandle": "Ie",
+            "useLayoutEffect": "we",
+            "useMemo": "Ae",
+            "useReducer": "Fe",
+            "useRef": "Le",
+            "useState": "qe",
+            "version": "De"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod5"
+      }
+    ],
+    "https://cdn.esm.sh/v46/react-dom@17.0.2/deno/react-dom.js": [
+      {
+        "input": "https://cdn.esm.sh/v46/react-dom@17.0.2/deno/react-dom.js",
+        "output": "dist/deps/6e230baeae5d40f9bbe45507ccee3134c23adcb6ba89514b8421f5fcd0c8c00a.js",
+        "dependencies": {
+          "https://cdn.esm.sh/v46/react@17.0.2/deno/react.js": {
+            "Import": {
+              "defaults": [
+                "__react$"
+              ]
+            }
+          },
+          "https://cdn.esm.sh/v46/object-assign@4.1.1/deno/object-assign.js": {
+            "Import": {
+              "defaults": [
+                "__object_assign$"
+              ]
+            }
+          },
+          "https://cdn.esm.sh/v46/scheduler@0.20.2/deno/scheduler.js": {
+            "Import": {
+              "defaults": [
+                "__scheduler$"
+              ]
+            }
+          }
+        },
+        "export": {
+          "specifiers": {
+            "__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED": "Mf",
+            "createPortal": "Rf",
+            "default": "export_default",
+            "findDOMNode": "Df",
+            "flushSync": "If",
+            "hydrate": "Ff",
+            "render": "jf",
+            "unmountComponentAtNode": "Uf",
+            "unstable_batchedUpdates": "Vf",
+            "unstable_createPortal": "Bf",
+            "unstable_renderSubtreeIntoContainer": "Hf",
+            "version": "Wf"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod6"
+      }
+    ],
+    "src/GameFrame.tsx": [
+      {
+        "input": "src/GameFrame.tsx",
+        "output": "dist/deps/2436db0f5da51437236e1b3367ec9e48e3bb2220b4a9e08a64a06208b8142bca.js",
+        "dependencies": {
+          "https://esm.sh/react@17": {
+            "Import": {
+              "defaults": [
+                "React"
+              ]
+            }
+          },
+          "src/chess/useGame.ts": {
+            "Import": {
+              "defaults": [
+                "useGame"
+              ]
+            }
+          },
+          "src/ChessBoard.tsx": {
+            "Import": {
+              "defaults": [
+                "ChessBoard"
+              ]
+            }
+          }
+        },
+        "export": {
+          "default": "GameFrame"
+        },
+        "type": "Import",
+        "importSpecifier": "mod7"
+      }
+    ],
+    "src/App.css": [
+      {
+        "input": "src/App.css",
+        "output": "dist/deps/60f5dcfc15327d5dd812d9df394c217efbedb4aa33dca782ed69d39dce811972.css",
+        "export": {},
+        "dependencies": {},
+        "type": "Import",
+        "importSpecifier": "mod8"
+      }
+    ],
+    "https://cdn.esm.sh/v46/object-assign@4.1.1/deno/object-assign.js": [
+      {
+        "input": "https://cdn.esm.sh/v46/object-assign@4.1.1/deno/object-assign.js",
+        "output": "dist/deps/356a6c7ef6ad8cb1dbbf2a3dcfa5789d18ccfe98d08c90f263eb38544c6b0f9d.js",
+        "dependencies": {},
+        "export": {
+          "specifiers": {
+            "default": "export_default"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod9"
+      }
+    ],
+    "https://cdn.esm.sh/v46/scheduler@0.20.2/deno/scheduler.js": [
+      {
+        "input": "https://cdn.esm.sh/v46/scheduler@0.20.2/deno/scheduler.js",
+        "output": "dist/deps/e3c4e1ccae0f46f028a5391dfa1d8f757568161aeb37964548a5d6fe83ee0143.js",
+        "dependencies": {},
+        "export": {
+          "specifiers": {
+            "default": "export_default",
+            "unstable_IdlePriority": "pe",
+            "unstable_ImmediatePriority": "de",
+            "unstable_LowPriority": "_e",
+            "unstable_NormalPriority": "ye",
+            "unstable_Profiling": "me",
+            "unstable_UserBlockingPriority": "ve",
+            "unstable_cancelCallback": "he",
+            "unstable_continueExecution": "we",
+            "unstable_forceFrameRate": "be",
+            "unstable_getCurrentPriorityLevel": "ke",
+            "unstable_getFirstCallbackNode": "ge",
+            "unstable_next": "Pe",
+            "unstable_now": "ce",
+            "unstable_pauseExecution": "xe",
+            "unstable_requestPaint": "Te",
+            "unstable_runWithPriority": "Ie",
+            "unstable_scheduleCallback": "Me",
+            "unstable_shouldYield": "fe",
+            "unstable_wrapCallback": "je"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod10"
+      }
+    ],
+    "src/chess/useGame.ts": [
+      {
+        "input": "src/chess/useGame.ts",
+        "output": "dist/deps/05c8adb1d7c423de0b78eb1b4cca1922aec5b302011bccf09873bde08a8c3fe3.js",
+        "dependencies": {
+          "https://esm.sh/react@17": {
+            "Import": {
+              "defaults": [
+                "React"
+              ]
+            }
+          },
+          "https://esm.sh/react-use-websocket@2.7.1": {
+            "Import": {
+              "defaults": [
+                "useWebSocket"
+              ]
+            }
+          },
+          "src/chess/board.ts": {
+            "Import": {
+              "specifiers": {
+                "Board": "Board",
+                "Position": "Position"
+              }
+            }
+          },
+          "src/chess/pieces.ts": {
+            "Import": {
+              "specifiers": {
+                "Color": "Color"
+              }
+            }
+          }
+        },
+        "export": {
+          "default": "useGame"
+        },
+        "type": "Import",
+        "importSpecifier": "mod11"
+      }
+    ],
+    "src/ChessBoard.tsx": [
+      {
+        "input": "src/ChessBoard.tsx",
+        "output": "dist/deps/e97da6ca7c7a6c734f00331432b954e2d6d5c8ef911f563d2a048f235a3c693c.js",
+        "dependencies": {
+          "https://esm.sh/react@17": {
+            "Import": {
+              "defaults": [
+                "React"
+              ]
+            }
+          },
+          "https://esm.sh/chessboardjsx@2.4.7": {
+            "Import": {
+              "defaults": [
+                "ChessBoard"
+              ]
+            }
+          },
+          "src/chess/board.ts": {
+            "Import": {
+              "specifiers": {
+                "Board": "Board",
+                "Position": "Position",
+                "Square": "Square",
+                "getSquare": "getSquare",
+                "getPositionIndex": "getPositionIndex",
+                "getPositionFromSquare": "getPositionFromSquare",
+                "getPosition": "getPosition"
+              }
+            }
+          },
+          "src/chess/pieces.ts": {
+            "Import": {
+              "specifiers": {
+                "CHESS_PIECE_CODE_TO_CHAR_MAP": "CHESS_PIECE_CODE_TO_CHAR_MAP",
+                "Color": "Color",
+                "PieceCode": "PieceCode"
+              }
+            }
+          },
+          "src/wasm/wasm_chess.js": {
+            "Import": {
+              "specifiers": {
+                "createBoard": "create_board",
+                "getPieceIndex": "get_piece_index_from_character"
+              }
+            }
+          }
+        },
+        "export": {
+          "default": "GameBoard"
+        },
+        "type": "Import",
+        "importSpecifier": "mod12"
+      }
+    ],
+    "https://esm.sh/react-use-websocket@2.7.1": [
+      {
+        "input": "https://esm.sh/react-use-websocket@2.7.1",
+        "output": "dist/deps/05094008e7317b86dbce7c659c8e80f74a9eb61400698d0824aa778760b5f03a.js",
+        "dependencies": {
+          "https://cdn.esm.sh/v44/react-use-websocket@2.7.1/deno/react-use-websocket.js": {
+            "Import": {
+              "namespaces": [
+                "*"
+              ],
+              "specifiers": {
+                "default": "default"
+              }
+            }
+          }
+        },
+        "export": {
+          "namespaces": [
+            "https://cdn.esm.sh/v44/react-use-websocket@2.7.1/deno/react-use-websocket.js"
+          ],
+          "specifiers": {
+            "default": "default"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod13"
+      }
+    ],
+    "src/chess/board.ts": [
+      {
+        "input": "src/chess/board.ts",
+        "output": "dist/deps/d057d3d119280e8e5c3517d69d9c74c4aadf0f0e42c5d7d2bfdd1486dca92e15.js",
+        "dependencies": {
+          "src/chess/pieces.ts": {
+            "Import": {
+              "specifiers": {
+                "PieceCode": "PieceCode"
+              }
+            }
+          }
+        },
+        "export": {
+          "types": {
+            "Position": "Position",
+            "Square": "Square",
+            "Board": "Board"
+          },
+          "specifiers": {
+            "getPositionIndex": "getPositionIndex",
+            "getPosition": "getPosition",
+            "getSquare": "getSquare",
+            "getPositionFromSquare": "getPositionFromSquare"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod14"
+      }
+    ],
+    "src/chess/pieces.ts": [
+      {
+        "input": "src/chess/pieces.ts",
+        "output": "dist/deps/b66b5a0ecf379722d8b6291aa61edf74f8b21a6ae47570514a47716812c5efd9.js",
+        "dependencies": {},
+        "export": {
+          "specifiers": {
+            "WHITE_KING_CHAR": "WHITE_KING_CHAR",
+            "WHITE_QUEEN_CHAR": "WHITE_QUEEN_CHAR",
+            "WHITE_ROOK_CHAR": "WHITE_ROOK_CHAR",
+            "WHITE_BISHOP_CHAR": "WHITE_BISHOP_CHAR",
+            "WHITE_KNIGHT_CHAR": "WHITE_KNIGHT_CHAR",
+            "WHITE_PAWN_CHAR": "WHITE_PAWN_CHAR",
+            "BLACK_KING_CHAR": "BLACK_KING_CHAR",
+            "BLACK_QUEEN_CHAR": "BLACK_QUEEN_CHAR",
+            "BLACK_ROOK_CHAR": "BLACK_ROOK_CHAR",
+            "BLACK_BISHOP_CHAR": "BLACK_BISHOP_CHAR",
+            "BLACK_KNIGHT_CHAR": "BLACK_KNIGHT_CHAR",
+            "BLACK_PAWN_CHAR": "BLACK_PAWN_CHAR",
+            "isPiece": "isPiece",
+            "CHESS_PIECE_CHAR_TO_CODE_MAP": "CHESS_PIECE_CHAR_TO_CODE_MAP",
+            "CHESS_PIECE_CODE_TO_CHAR_MAP": "CHESS_PIECE_CODE_TO_CHAR_MAP"
+          },
+          "types": {
+            "Color": "Color",
+            "Piece": "Piece",
+            "PieceCode": "PieceCode"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod15"
+      }
+    ],
+    "https://esm.sh/chessboardjsx@2.4.7": [
+      {
+        "input": "https://esm.sh/chessboardjsx@2.4.7",
+        "output": "dist/deps/ee9cb99ea23b1ac918a4d18c287bef449e2fb5e6a9d88584027f1b3b4b69258e.js",
+        "dependencies": {
+          "https://cdn.esm.sh/v44/chessboardjsx@2.4.7/deno/chessboardjsx.js": {
+            "Import": {
+              "namespaces": [
+                "*"
+              ],
+              "specifiers": {
+                "default": "default"
+              }
+            }
+          }
+        },
+        "export": {
+          "namespaces": [
+            "https://cdn.esm.sh/v44/chessboardjsx@2.4.7/deno/chessboardjsx.js"
+          ],
+          "specifiers": {
+            "default": "default"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod16"
+      }
+    ],
+    "https://cdn.esm.sh/v44/react-use-websocket@2.7.1/deno/react-use-websocket.js": [
+      {
+        "input": "https://cdn.esm.sh/v44/react-use-websocket@2.7.1/deno/react-use-websocket.js",
+        "output": "dist/deps/855e6f573956b5e7a42c70ad2338306e51f88b5aa96b666e9cb879b32d5074fb.js",
+        "dependencies": {
+          "https://cdn.esm.sh/v44/react@17.0.2/deno/react.js": {
+            "Import": {
+              "defaults": [
+                "__react$"
+              ]
+            }
+          }
+        },
+        "export": {
+          "specifiers": {
+            "ReadyState": "Jt",
+            "default": "export_default",
+            "useEventSource": "Ft",
+            "useSocketIO": "qt"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod17"
+      }
+    ],
+    "https://cdn.esm.sh/v44/chessboardjsx@2.4.7/deno/chessboardjsx.js": [
+      {
+        "input": "https://cdn.esm.sh/v44/chessboardjsx@2.4.7/deno/chessboardjsx.js",
+        "output": "dist/deps/05b9730d2f0bca7e64aeb0fc68708843d8d351e66f54923eb635d50e79f81a00.js",
+        "dependencies": {
+          "https://cdn.esm.sh/v44/react@17.0.2/deno/react.js": {
+            "Import": {
+              "defaults": [
+                "__react$"
+              ]
+            }
+          }
+        },
+        "export": {
+          "specifiers": {
+            "chessboardjsx": "tn",
+            "default": "export_default"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod18"
+      }
+    ],
+    "https://cdn.esm.sh/v44/react@17.0.2/deno/react.js": [
+      {
+        "input": "https://cdn.esm.sh/v44/react@17.0.2/deno/react.js",
+        "output": "dist/deps/4cc95c41813b23aa309ed0c1d80aeaf8b2156891a98c1242ddd46f346622dd74.js",
+        "dependencies": {
+          "https://cdn.esm.sh/v44/object-assign@4.1.1/deno/object-assign.js": {
+            "Import": {
+              "defaults": [
+                "__object_assign$"
+              ]
+            }
+          }
+        },
+        "export": {
+          "specifiers": {
+            "Children": "ye",
+            "Component": "de",
+            "Fragment": "fe",
+            "Profiler": "pe",
+            "PureComponent": "_e",
+            "StrictMode": "le",
+            "Suspense": "ae",
+            "__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED": "ve",
+            "cloneElement": "me",
+            "createContext": "he",
+            "createElement": "Ee",
+            "createFactory": "Se",
+            "createRef": "Ce",
+            "default": "export_default",
+            "forwardRef": "Re",
+            "isValidElement": "ke",
+            "lazy": "$e",
+            "memo": "ge",
+            "useCallback": "je",
+            "useContext": "Oe",
+            "useDebugValue": "Pe",
+            "useEffect": "xe",
+            "useImperativeHandle": "Ie",
+            "useLayoutEffect": "we",
+            "useMemo": "Ae",
+            "useReducer": "Fe",
+            "useRef": "Le",
+            "useState": "qe",
+            "version": "De"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod19"
+      }
+    ],
+    "https://cdn.esm.sh/v44/object-assign@4.1.1/deno/object-assign.js": [
+      {
+        "input": "https://cdn.esm.sh/v44/object-assign@4.1.1/deno/object-assign.js",
+        "output": "dist/deps/3d8c29f806ee834d996a7633deae84fdca57920722386284ff018a3286151d9b.js",
+        "dependencies": {},
+        "export": {
+          "specifiers": {
+            "default": "export_default"
+          }
+        },
+        "type": "Import",
+        "importSpecifier": "mod20"
+      }
+    ]
+  }
+}

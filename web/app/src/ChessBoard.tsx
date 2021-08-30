@@ -1,8 +1,8 @@
 import React from 'react'
 import ChessBoard from 'chessboardjsx'
 
-import {Board, Position, Square, getSquare, getPositionIndex, getPositionFromSquare, getPosition} from './board'
-import {CHESS_PIECE_CODE_TO_CHAR_MAP, Color, PieceCode} from './pieces'
+import {Board, Position, Square, getSquare, getPositionIndex, getPositionFromSquare, getPosition} from './chess/board.ts'
+import {CHESS_PIECE_CODE_TO_CHAR_MAP, Color, PieceCode} from './chess/pieces.ts'
 import {
   create_board as createBoard,
   get_piece_index_from_character as getPieceIndex,
