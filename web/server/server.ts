@@ -4,10 +4,8 @@ import { contentType } from './deps.ts'
 import init from './wasm/wasm_chess.js'
 import Game from './chess/Game.ts'
 import getMoves from './chess/getMoves.ts'
-
+import {getStaticFile, getFile} from './files.ts'
 import Store from './Store.ts'
-
-const authToken = Deno.env.get('GITHUB_SECRET')
 
 const port = +(Deno.env.get('PORT') ?? 8080)
 
@@ -76,79 +74,17 @@ app.use((ctx, next) => {
   return next()
 })
 
-interface GithubTree {
-  tree: {
-    path: string
-    type: string
-    url: string
-  }[]
-}
-
-async function makeRequest(url: URL | string, headers?: Headers): Promise<Response> {
-  const urlObj = url instanceof URL ? url : new URL(url)
-  return await fetch(urlObj, {
-    headers: { ...(headers ?? {}), Authorization: `token ${authToken}` },
-  })
-}
-
-async function traverseGithubTree(tree: GithubTree, path: string[]): Promise<GithubTree> {
-  if (path.length === 0) return tree
-  const maybeFile = tree.tree.find((file) => file.path === path[0])
-  if (!maybeFile) throw new Error(`Cannot find ${JSON.stringify({path})}`)
-  const {url} = maybeFile
-  const nextTree = await (await makeRequest(url)).json()
-  return await traverseGithubTree(nextTree, path.slice(1))
-}
-
-// TODO recurse and grab all the file path names to allow
-async function getFileNames(directory: GithubTree, node: string): Promise<string[]> {
-  const filenames = await Promise.all(
-    directory.tree.map(async ({path, type, url}) => {
-      const newPath = `${node}/${path}`
-      if (type === 'tree') {
-        const data = await (await makeRequest(url)).json()
-        return await getFileNames(data, newPath)
-      }
-      return [newPath]
-    })
-  )
-  return filenames.flatMap((arr) => arr)
-}
-
-async function getStaticFileAllowList() {
-  const url = `https://api.github.com/repos/sullivansean27/psychess/branches/deploy`
-  const deployBranch = await (await makeRequest(url)).json()
-
-  const treeUrl = deployBranch.commit.commit.tree.url
-  const treeFiles = await (await makeRequest(treeUrl)).json()
-  const staticDirectory = await traverseGithubTree(treeFiles, ['web', 'server', 'public'])
-  return await getFileNames(staticDirectory, '')
-}
-
-const STATIC_FILE_PATHS = await getStaticFileAllowList()
-
-// where this file is imported, except ./public
-const ASSET_URL = (function () {
-  if (import.meta.url.startsWith('file://')) {
-    return `https://raw.githubusercontent.com/sullivansean27/psychess/deploy/web/server/public`
-  }
-  const splitUrl = import.meta.url.split('/')
-  const root = splitUrl.slice(0, splitUrl.length - 1).join('/')
-  return `${root}/public`
-})()
-
 // handle static routes by proxying to web resources
 // https://deno.com/deploy/docs/serve-static-assets
 app.use(async (ctx, next) => {
   const { url } = ctx.request
   const pathname = url.pathname === '/' ? '/index.html' : url.pathname
-  const isKnownStaticFile = STATIC_FILE_PATHS.includes(pathname)
-  if (!isKnownStaticFile) {
+
+  // first retrieve the file from github
+  const response = await getStaticFile(pathname)
+  if (response === null) {
     return await next()
   }
-  const assetURL = `${ASSET_URL}${pathname}`
-  console.log(`${url} => ${assetURL}`)
-  const response = await makeRequest(assetURL)
 
   // get just the last bit so we can determine the correct filetype
   // contentType from media-types@v2.10.0 checks path.includes('/')
@@ -181,8 +117,8 @@ app.use((context) => {
 console.log(`Listening on port ${port}...`)
 
 // https://deno.com/deploy/docs/serve-static-assets
-const wasmURL = new URL('chess/wasm/wasm_chess_bg.wasm', import.meta.url)
+const WASM_PATH = 'chess/wasm/wasm_chess_bg.wasm'
 // https://github.com/rustwasm/wasm-pack/issues/672#issuecomment-813630435
-await init(makeRequest(wasmURL))
+await init(getFile(WASM_PATH))
 
 app.listen(':8080')
