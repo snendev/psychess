@@ -71,6 +71,7 @@ app.use(async (ctx, next) => {
 });
 app.use((ctx, next) => {
   ctx.response.headers.set('Access-Control-Allow-Origin', '*')
+  ctx.response.headers.delete("content-security-policy");
   return next()
 })
 
