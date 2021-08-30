@@ -96,7 +96,7 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
   }, [])
   
   const socket = useWebSocket(
-    `ws://localhost:8080/api/ws`,
+    `ws://${window.location.hostname}/api/ws`,
     {onMessage, onOpen, onError, onClose, shouldReconnect},
   )
 

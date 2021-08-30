@@ -1,9 +1,9 @@
-import {CHESS_PIECE_CODE_TO_CHAR_MAP} from "~/chess/pieces.ts"
-import {Square, Board, Position, getPosition, getPositionIndex, getPositionFromSquare} from '~/chess/board.ts'
+import {CHESS_PIECE_CODE_TO_CHAR_MAP} from "./pieces.ts"
+import {Square, Board, Position, getPosition, getPositionIndex, getPositionFromSquare} from './board.ts'
 import {
   create_board as createBoard,
   get_piece_index_from_character as getPieceIndex,
-} from '~/chess/wasm/wasm_chess.js'
+} from './wasm/wasm_chess.js'
 
 function createPiecePositionSlice(pieces: Board['pieces']): Int32Array {
   const values: number[] = Object.entries(pieces).flatMap(([square, pieceCode]) => {
