@@ -183,5 +183,4 @@ const wasmURL = new URL('chess/wasm/wasm_chess_bg.wasm', import.meta.url)
 // https://github.com/rustwasm/wasm-pack/issues/672#issuecomment-813630435
 await init(makeRequest(wasmURL))
 
-// https://oakserver.github.io/oak/deploy#Handling_requests
-addEventListener("fetch", app.fetchEventHandler());
+app.listen(':8080')
