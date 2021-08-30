@@ -1,7 +1,7 @@
 import { Application, Router, Status } from './deps.ts'
 import { contentType } from './deps.ts'
 
-import init from './chess/wasm/wasm_chess.js'
+import init from './wasm/wasm_chess.js'
 import Game from './chess/Game.ts'
 import getMoves from './chess/getMoves.ts'
 
