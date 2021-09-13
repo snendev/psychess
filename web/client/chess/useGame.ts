@@ -96,8 +96,12 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
     dispatch({ type: 'close' })
   }, [])
 
+  const url = React.useMemo(() =>
+    `ws://${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api/ws`,
+    [],
+  )
   const socket = useWebSocket(
-    `wss://${window.location.hostname}/api/ws`,
+    url,
     {onMessage, onOpen, onError, onClose, shouldReconnect},
   )
 
