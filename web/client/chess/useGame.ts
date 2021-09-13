@@ -105,6 +105,18 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
     {onMessage, onOpen, onError, onClose, shouldReconnect},
   )
 
+  React.useEffect(() => {
+    if (socket.readyState !== WebSocket.OPEN) return
+    // keepalive loop for heroku
+    const unsubscribe = setInterval(() => {
+      console.log('ping')
+      socket.sendMessage('')
+    }, 200)
+    return () => {
+      clearInterval(unsubscribe)
+    }
+  }, [socket])
+
   const movePiece = React.useCallback((origin: Position, target: Position): void => {
     socket.sendJsonMessage({type: 'move', origin, target})
   }, [socket])
