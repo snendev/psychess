@@ -3,11 +3,11 @@ import React from 'react';
 import GameFrame from '~/client/chess/GameFrame.tsx'
 
 function useIsMounted(): boolean {
-  const [isMounted, setIsMounted] = React.useState(false)
+  const [hasMounted, setHasMounted] = React.useState(false)
   React.useEffect(() => {
-    setIsMounted(true)
+    setHasMounted(true)
   })
-  return isMounted
+  return hasMounted
 }
 
 function App() {
