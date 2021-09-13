@@ -1,8 +1,8 @@
 import React from 'react'
 import useWebSocket from 'react-use-websocket'
 
-import {Board, Position} from './board.ts'
-import {Color} from './pieces.ts'
+import {Board, Position} from '~/common/chess/board.ts'
+import {Color} from '~/common/chess/pieces.ts'
 
 function shouldReconnect() {
   console.log('Reconnecting...')
@@ -75,11 +75,11 @@ interface GameOptions {}
 
 export default function useGame(options?: GameOptions): AsyncHandle<Game> {
   const [state, dispatch] = React.useReducer(reducer, initialState)
+
   const {pieces, lastMove, myColor, turn} = state
 
   const onMessage = React.useCallback((message: {data: string}) => {
     const data = JSON.parse(message.data)
-    console.log(data)
     dispatch({ type: 'update', ...data })
   }, [])
 
@@ -88,15 +88,16 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
   }, [])
   
   const onError = React.useCallback((event: WebSocketEventMap['error']) => {
-    console.log(event)
+    console.error(event)
   }, [])
   
   const onClose = React.useCallback((_event: WebSocketEventMap['close']) => {
+    console.log('socket closed')
     dispatch({ type: 'close' })
   }, [])
-  
+
   const socket = useWebSocket(
-    `ws://${window.location.hostname}/api/ws`,
+    `ws://${window.location.hostname}:8080/api/ws`,
     {onMessage, onOpen, onError, onClose, shouldReconnect},
   )
 

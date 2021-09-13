@@ -1,18 +1,17 @@
 import React from 'react'
 import ChessBoard from 'chessboardjsx'
 
-import {Board, Position, Square, getSquare, getPositionIndex, getPositionFromSquare, getPosition} from './chess/board.ts'
-import {CHESS_PIECE_CODE_TO_CHAR_MAP, Color, PieceCode} from './chess/pieces.ts'
+import {Board, Position, Square, getSquare, getPositionIndex, getPositionFromSquare, getPosition} from '~/common/chess/board.ts'
+import {CHESS_PIECE_CODE_TO_CHAR_MAP, Color, PieceCode} from '~/common/chess/pieces.ts'
 import {
   create_board as createBoard,
   get_piece_index_from_character as getPieceIndex,
-} from './wasm/wasm_chess.js'
+} from '~/common/wasm/wasm_chess.js'
 
 function createPiecePositionSlice(pieces: Board['pieces']): Int32Array {
   const values: number[] = Object.entries(pieces).flatMap(([square, pieceCode]) => {
     const position = getPositionIndex(getPositionFromSquare(square))
     const piece = getPieceIndex(CHESS_PIECE_CODE_TO_CHAR_MAP[pieceCode])
-    console.log({position, piece, square, pieceCode})
     return [piece, position]
   })
   return new Int32Array(values)

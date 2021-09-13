@@ -1,10 +1,9 @@
 import {
   WasmClient,
   get_piece_from_i32 as getPieceFromI32,
-} from '../wasm/wasm_chess.js'
-
-import {isPiece, PieceCode, CHESS_PIECE_CHAR_TO_CODE_MAP} from './pieces.ts'
-import {Square, getPosition, getSquare, getPositionIndex} from './board.ts'
+} from '~/common/wasm/wasm_chess.js'
+import {isPiece, PieceCode, CHESS_PIECE_CHAR_TO_CODE_MAP} from '~/common/chess/pieces.ts'
+import {Square, getPosition, getSquare, getPositionIndex} from '~/common/chess/board.ts'
 
 export interface Client {
   id: string
