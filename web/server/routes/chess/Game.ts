@@ -107,6 +107,8 @@ export default class Game {
       this.handleMessage(client, event.data)
     })
     client.socket.addEventListener('close', (event) => {
+      console.log(`${client.id} socket closed`)
+      console.log(event)
       const thisClientIndex = this.clients.findIndex((_client) => _client.id === client.id)
       this.clients.splice(thisClientIndex, 1)
 

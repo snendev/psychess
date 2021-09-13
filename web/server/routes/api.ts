@@ -21,7 +21,10 @@ function handleSocket(socket: WebSocket) {
     const newId = store.makeId()
     const game = new Game(
       newId,
-      () => { store.remove(newId) }
+      () => {
+        console.log(`closing game ${newId}`)
+        store.remove(newId)
+      }
     )
     game.register(thisClient)
     store.set(game)
@@ -34,8 +37,8 @@ const apiRouter = new Router()
 apiRouter
   .get('/api/ws', async (context) => {
     if (!context.isUpgradable) throw new Error('Context not upgradable.')
-    const socket = await context.upgrade()
-    handleSocket(socket)
+    const ws = await context.upgrade()
+    handleSocket(ws)
   })
   .post('/api/getMoves', async (context) => {0
     console.log("/api/game/getMoves invoked")
