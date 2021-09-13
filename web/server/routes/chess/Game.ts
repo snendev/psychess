@@ -46,9 +46,8 @@ export default class Game {
     if (!Object.keys(json).includes('type')) throw new Error()
 
     if (json.type === 'move') {
-      const currentTurnId = this._instance.is_white_turn()
-        ? this.playerWhite
-        : this.playerBlack
+      const isWhiteTurn = this._instance.is_white_turn()
+      const currentTurnId = isWhiteTurn ? this.playerWhite : this.playerBlack
 
       if (player.id !== currentTurnId) return
 
@@ -84,7 +83,7 @@ export default class Game {
     const playerWhiteIndex = Math.random() > 0.5 ? 1 : 0
     const playerBlackIndex = playerWhiteIndex === 1 ? 0 : 1
     this.playerWhite = this.clients[playerWhiteIndex].id
-    this.playerBlack = this.clients[playerBlackIndex === 1 ? 0 : 1].id
+    this.playerBlack = this.clients[playerBlackIndex].id
     this.status = 'ready'
     const board = this.render()
     this.clients[playerWhiteIndex].socket.send(
