@@ -1,5 +1,4 @@
-import { Router } from 'oak'
-
+import { Router } from '../../deps.ts'
 import Store from '../Store.ts'
 
 import getMoves from './chess/getMoves.ts'

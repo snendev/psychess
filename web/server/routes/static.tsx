@@ -1,14 +1,10 @@
-import React from 'react'
-import ReactDOMServer from 'react-dom/server'
-import { contentType } from 'media-types'
-import { Router } from 'oak'
-
-import App from '~/client/App.tsx'
+import { React, ReactDOMServer, contentType, Router } from '../../deps.ts'
+import App from '../../client/App.tsx'
 
 async function createClientBundle() {
   const {files} = await Deno.emit('client/client.tsx', {
     bundle: 'module',
-    importMapPath: 'import_map.json',
+    importMapPath: '../import_map.json',
     compilerOptions: {
       lib: ["dom", "dom.iterable", "esnext"],
       allowJs: true,

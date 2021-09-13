@@ -1,6 +1,5 @@
-import { Application, Status } from 'oak'
-
-import init from '~/common/wasm/wasm_chess.js'
+import { Application, Status } from '../deps.ts'
+import init from '../common/wasm/wasm_chess.js'
 
 import apiRouter from './routes/api.ts'
 import staticRouter from './routes/static.tsx'
