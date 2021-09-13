@@ -160,9 +160,7 @@ export default class Game {
 
   publish = (data: {}) => {
     for (let i = 0; i < this.clients.length; i++) {
-      for (let j = 0; j < 10; j++) {
-        this.clients[i].socket.send(JSON.stringify(data))
-      }
+      this.clients[i].socket.send(JSON.stringify(data))
     }
   }
 }
