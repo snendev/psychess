@@ -31,7 +31,6 @@ const html = `
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="connect-src 'self' wss://host:port ws://host:port;" />
     <title>Psy(chic) Chess</title>
     <meta name="description" content="Wacky chess variant" />
     <style>
@@ -75,7 +74,7 @@ staticRouter
     const headers = new Headers(ctx.response.headers)
     headers.set(
       'Content-Security-Policy',
-      `default-src 'self' https://raw.githubusercontent.com; script-src 'self'; connect-src ws:`,
+      `default-src 'self' https://raw.githubusercontent.com; script-src 'self'; connect-src ws: wss:`,
     )
     ctx.response.body = html
   })
