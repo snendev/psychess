@@ -97,14 +97,14 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
   }, [])
 
   const url = React.useMemo(() =>
-    `ws://${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api/ws`,
+    `wss://${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api/ws`,
     [],
   )
   const socket = useWebSocket(
     url,
     {onMessage, onOpen, onError, onClose, shouldReconnect},
   )
-  console.log('render useGame')
+
   React.useEffect(() => {
     // keepalive loop for heroku
     console.log('subscribe to interval??')
