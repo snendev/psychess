@@ -104,7 +104,7 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
     url,
     {onMessage, onOpen, onError, onClose, shouldReconnect},
   )
-
+  console.log('render useGame')
   React.useEffect(() => {
     // keepalive loop for heroku
     console.log('subscribe to interval??')
