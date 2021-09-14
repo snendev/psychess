@@ -102,6 +102,10 @@ export default function GameBoard(
     [lastMove, selectedSquare, validTargets],
   )
 
+  // TODO: when receiving a new board state reflecting a capture from the previous state,
+  // ChessboardJSX seems to be deleting the key for the captured square, which is where
+  // the moved piece is now located.
+
   return (
     <ChessBoard
       allowDrag={allowDrag}

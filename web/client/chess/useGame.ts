@@ -78,7 +78,7 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
 
   const {pieces, lastMove, myColor, turn} = state
 
-  const onMessage = React.useCallback((message: {data: string}) => {
+  const onMessage = React.useCallback((message: WebSocketEventMap['message']) => {
     const data = JSON.parse(message.data)
     dispatch({ type: 'update', ...data })
   }, [])
