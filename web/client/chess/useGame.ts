@@ -105,16 +105,13 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
     {onMessage, onOpen, onError, onClose, shouldReconnect},
   )
 
+  // keepalive loop for heroku
   React.useEffect(() => {
-    // keepalive loop for heroku
-    console.log('subscribe to interval??')
     const unsubscribe = setInterval(() => {
       if (socket.readyState !== WebSocket.OPEN) return
-      console.log('ping')
       socket.sendMessage('')
     }, 200)
     return () => {
-      console.log('clear interval')
       clearInterval(unsubscribe)
     }
   }, [socket])
