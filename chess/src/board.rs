@@ -249,13 +249,22 @@ impl Board {
 
     fn is_available_square(&self, square: Position, color: Option<Color>) -> bool {
         !self.pieces.clone().into_iter().any(|piece| {
-            let is_blocking = if let Some(color) = color {
+            let would_piece_block = if let Some(color) = color {
                 piece.piece.is_ally(color)
             } else {
                 true
             };
             let is_occupying_square = self.get_piece_position(&piece).unwrap() == square;
-            is_blocking && is_occupying_square
+            would_piece_block && is_occupying_square
+        })
+    }
+
+    fn is_capture_square(&self, square: Position, color: Color) -> bool {
+        self.pieces.clone().into_iter().any(|piece| {
+            if piece.piece.is_ally(color) {
+                return false
+            }
+            self.get_piece_position(&piece).unwrap() == square
         })
     }
 
@@ -272,7 +281,7 @@ impl Board {
         let mut attack_squares = origin
             .get_pawn_attack_targets(color)
             .into_iter()
-            .filter(|&square| self.is_available_square(square, Some(color)))
+            .filter(|&square| self.is_capture_square(square, color))
             .collect();
         target_squares.append(&mut attack_squares);
         target_squares

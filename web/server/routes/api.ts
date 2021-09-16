@@ -1,9 +1,9 @@
 import { Router } from 'oak'
 
-import Store from '../Store.ts'
+import { getMoves } from '~/common/chess/wasm_utils.ts'
 
-import getMoves from './chess/getMoves.ts'
-import Game from './chess/Game.ts'
+import Store from './api/Store.ts'
+import Game from './api/Game.ts'
 
 const store = new Store<Game>("id")
 
@@ -11,7 +11,6 @@ function handleSocket(socket: WebSocket) {
   const foundGame = store.find((game) => game.status === 'open')
   const thisSocketId = store.makeId()
   const thisClient = {id: thisSocketId, socket}
-  console.log({thisClient, foundGame})
 
   if (foundGame) {
     // register the player, game client will handle the rest
