@@ -1,7 +1,8 @@
 import React from 'react'
 
 import ChessBoard from './ChessBoard.tsx'
-import useGame from './useGame.ts'
+import LocalGame from './LocalGame.tsx'
+import useServerGame from './useServerGame.ts'
 
 function Connecting(): JSX.Element {
   return (
@@ -9,22 +10,29 @@ function Connecting(): JSX.Element {
   )
 }
 
-export default function GameFrame(): JSX.Element {
-  const game = useGame()
+export default function ServerGame(): JSX.Element {
+  const game = useServerGame()
 
   return (
     <div className="frame">
       {game.status === 'connected'
         ? (
             <ChessBoard
+              key="server"
               pieces={game.handle.pieces}
               lastMove={game.handle.lastMove}
               movePiece={game.handle.movePiece}
+              getValidTargets={game.handle.getValidTargets}
               myColor={game.handle.myColor}
               turn={game.handle.turn}
             />
           )
-        : <Connecting />
+        : (
+          <React.Fragment>
+            <Connecting />
+            <LocalGame />
+          </React.Fragment>
+        )
       }
     </div>
   )

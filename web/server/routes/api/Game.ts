@@ -1,9 +1,6 @@
-import {
-  WasmClient,
-  get_piece_from_i32 as getPieceFromI32,
-} from '~/common/wasm/wasm_chess.js'
-import {isPiece, PieceCode, CHESS_PIECE_CHAR_TO_CODE_MAP} from '~/common/chess/pieces.ts'
-import {Square, getPosition, getSquare, getPositionIndex} from '~/common/chess/board.ts'
+import { WasmClient } from '~/common/wasm/wasm_chess.js'
+import { getPosition, getPositionIndex} from '~/common/chess/board.ts'
+import { getTurn, renderPieces } from '~/common/chess/wasm_utils.ts'
 
 export interface Client {
   id: string
@@ -85,12 +82,12 @@ export default class Game {
     this.playerWhite = this.clients[playerWhiteIndex].id
     this.playerBlack = this.clients[playerBlackIndex].id
     this.status = 'ready'
-    const board = this.render()
+    const {pieces, turn} = this.render()
     this.clients[playerWhiteIndex].socket.send(
-      JSON.stringify({myColor: 'white', ...board})
+      JSON.stringify({myColor: 'white', pieces, turn})
     )
     this.clients[playerBlackIndex].socket.send(
-      JSON.stringify({myColor: 'black', ...board})
+      JSON.stringify({myColor: 'black', pieces, turn})
     )
   }
 
@@ -140,23 +137,10 @@ export default class Game {
   }
 
   render = () => {
-    const board = this._instance.render_board()
-    const pieces = Object.fromEntries(
-      Array.from(board)
-        .map<[Square, PieceCode] | null>(
-          (pieceValue, positionIndex) => {
-            const piece = getPieceFromI32(pieceValue)
-            if (!isPiece(piece)) return null
-            const position = getPosition(positionIndex)
-            return [getSquare(position), CHESS_PIECE_CHAR_TO_CODE_MAP[piece]]
-          }
-        )
-        .filter(
-          <T>(value: T | null): value is T => value !== null
-        )
-    )
-    const turn = this._instance.is_white_turn() ? 'white' : 'black'
-    return {pieces, turn}
+    return {
+      pieces: renderPieces(this._instance),
+      turn: getTurn(this._instance),
+    }
   }
 
   publish = (data: {}) => {

@@ -23,7 +23,6 @@ function getFile(path: string) {
   return bundle[`deno:///${path}`]
 }
 
-
 const html = `
 <!DOCTYPE html>
 <html lang="en">

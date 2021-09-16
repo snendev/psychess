@@ -3,6 +3,7 @@ import useWebSocket from 'react-use-websocket'
 
 import {Board, Position} from '~/common/chess/board.ts'
 import {Color} from '~/common/chess/pieces.ts'
+import {createBoard, getMoves} from '~/common/chess/wasm_utils.ts'
 
 function shouldReconnect() {
   console.log('Reconnecting...')
@@ -21,7 +22,7 @@ interface Game {
   // validTargets: Square[]
   turn: Color
 
-  // setSelectedSquare: (square: Square) => void
+  getValidTargets: (position: Position) => Position[]
   // one-way requests; have to receive responses in onMessage
   movePiece: (origin: Position, target: Position) => void
 }
@@ -73,7 +74,7 @@ function reducer(state: GameHookState, action: GameHookAction): GameHookState {
 
 interface GameOptions {}
 
-export default function useGame(options?: GameOptions): AsyncHandle<Game> {
+export default function useServerGame(options?: GameOptions): AsyncHandle<Game> {
   const [state, dispatch] = React.useReducer(reducer, initialState)
 
   const {pieces, lastMove, myColor, turn} = state
@@ -109,6 +110,12 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
     socket.sendJsonMessage({type: 'move', origin, target})
   }, [socket])
 
+  const getValidTargets = React.useCallback((position: Position): Position[] => {
+    // turn does not matter since getMoves will ignore it anyway
+    const localGame = createBoard({pieces, turn: 'white'})
+    return getMoves(localGame, position)
+  }, [pieces])
+
   const handle = React.useMemo<Game | null>(
     () =>
       pieces
@@ -117,10 +124,11 @@ export default function useGame(options?: GameOptions): AsyncHandle<Game> {
             lastMove,
             myColor,
             turn,
+            getValidTargets,
             movePiece,
           })
         : null,
-    [pieces, lastMove, myColor, movePiece, turn],
+    [pieces, lastMove, myColor, turn, getValidTargets, movePiece],
   )
 
   if (handle === null) {

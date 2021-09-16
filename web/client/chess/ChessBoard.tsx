@@ -1,36 +1,27 @@
 import React from 'react'
 import ChessBoard from 'chessboardjsx'
 
-import {Board, Position, Square, getSquare, getPositionIndex, getPositionFromSquare, getPosition} from '~/common/chess/board.ts'
-import {CHESS_PIECE_CODE_TO_CHAR_MAP, Color, PieceCode} from '~/common/chess/pieces.ts'
-import {
-  create_board as createBoard,
-  get_piece_index_from_character as getPieceIndex,
-} from '~/common/wasm/wasm_chess.js'
+import {Board, Position, Square, getSquare, getPositionFromSquare} from '~/common/chess/board.ts'
+import {Color, PieceCode} from '~/common/chess/pieces.ts'
 
-function createPiecePositionSlice(pieces: Board['pieces']): Int32Array {
-  const values: number[] = Object.entries(pieces).flatMap(([square, pieceCode]) => {
-    const position = getPositionIndex(getPositionFromSquare(square))
-    const piece = getPieceIndex(CHESS_PIECE_CODE_TO_CHAR_MAP[pieceCode])
-    return [piece, position]
-  })
-  return new Int32Array(values)
-}
-
-function parseTargets(data: Int32Array): Position[] {
-  return Array.from(data).map((positionIndex) => getPosition(positionIndex))
+function determineOrientation(myColor: Color, invert: boolean): Color {
+  const isWhite = myColor === 'white'
+  return (isWhite && !invert) || (!isWhite && invert)
+    ? 'white'
+    : 'black'
 }
 
 interface BoardProps {
   pieces: Board['pieces']
   lastMove: [Position, Position] | null
   movePiece: (origin: Position, target: Position) => void
-  myColor: Color
+  getValidTargets: (target: Position) => Square[]
+  myColor: Color | null
   turn: Color
 }
 
-export default function GameBoard(
-  {pieces, lastMove, movePiece, myColor, turn}: BoardProps,
+export default function Board(
+  {pieces, lastMove, movePiece, myColor, turn, getValidTargets}: BoardProps,
 ): JSX.Element {
   // bucket of arrows, highlights, etc.
   // const [features, setFeatures] = React.useState<[Square, Square | null][]>([])
@@ -39,19 +30,18 @@ export default function GameBoard(
   const [selectedSquare, setSelectedSquare] = React.useState<Square | null>(null)
   const [validTargets, setValidTargets] = React.useState<Square[]>([])
 
+  const [boardIsInverted, setBoardIsInverted] = React.useState(false)
+
   const allowDrag = React.useCallback(({piece}: {piece: PieceCode}) => {
+    if (!myColor) return true
     const targetColor = piece.charAt(0) === 'w' ? 'white' : 'black'
     return targetColor === myColor
   }, [myColor])
 
   const handleSquareSelect = React.useCallback((target: Square) => {
     setValidTargets([])
-    if (!selectedSquare) {
-      const slice = createPiecePositionSlice(pieces)
-      const localGame = createBoard(slice, turn === 'white')
-      const selectedTarget = getPositionIndex(getPositionFromSquare(target))
-      const validTargetValues = localGame.get_valid_targets(selectedTarget)
-      const targets = parseTargets(validTargetValues).map((position) => getSquare(position))
+    if (!selectedSquare && pieces[target]) {
+      const targets = getValidTargets(getPositionFromSquare(target)).map(getSquare)
       setSelectedSquare(target)
       setValidTargets(targets)
       return
@@ -62,7 +52,7 @@ export default function GameBoard(
       getPositionFromSquare(selectedSquare),
       getPositionFromSquare(target),
     )
-  }, [movePiece, pieces, selectedSquare, turn, validTargets])
+  }, [movePiece, pieces, selectedSquare, turn, validTargets, getValidTargets])
 
   const handleDrop = React.useCallback(
     ({sourceSquare: originSquare, targetSquare}: {sourceSquare: Square, targetSquare: Square}) => {
@@ -91,7 +81,7 @@ export default function GameBoard(
         },
       } : {}),
       ...Object.fromEntries(
-        validTargets.map((target) => [
+        validTargets.map((target: Square) => [
           target,
           {
             backgroundColor: '#dddddd',
@@ -102,20 +92,30 @@ export default function GameBoard(
     [lastMove, selectedSquare, validTargets],
   )
 
+  const orientation = React.useMemo(() =>
+    determineOrientation(myColor ?? 'white', boardIsInverted),
+    [myColor, boardIsInverted]
+  )
+
   // TODO: when receiving a new board state reflecting a capture from the previous state,
   // ChessboardJSX seems to be deleting the key for the captured square, which is where
   // the moved piece is now located.
 
   return (
-    <ChessBoard
-      allowDrag={allowDrag}
-      dropOffBoard="snapback"
-      id="play"
-      position={pieces}
-      onSquareClick={handleSquareSelect}
-      onDrop={handleDrop}
-      orientation={myColor}
-      squareStyles={squareStyles}
-    />
+    <div>
+      <ChessBoard
+        allowDrag={allowDrag}
+        dropOffBoard="snapback"
+        id="play"
+        position={pieces}
+        onSquareClick={handleSquareSelect}
+        onDrop={handleDrop}
+        orientation={orientation}
+        squareStyles={squareStyles}
+      />
+      <button onClick={() => setBoardIsInverted((prev) => !prev)}>
+        flip board
+      </button>
+    </div>
   )
 }

@@ -1,4 +1,4 @@
-import {PieceCode} from './pieces.ts'
+import {Color, PieceCode} from './pieces.ts'
 
 export interface Position {
   row: number
@@ -8,6 +8,7 @@ export interface Position {
 export type Square = string
 export interface Board {
   pieces: Record<Square, PieceCode>
+  turn: Color
 }
 
 export function getPositionIndex(position: Position): number {
