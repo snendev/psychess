@@ -59,8 +59,7 @@ export default function useLocalGame(options: GameOptions = DEFAULT_OPTIONS): Ga
       getPositionIndex(origin),
       getPositionIndex(target),
     )
-    gameInstance.move_piece(origin, target)
-
+    if (!ok) return
     setState({
       lastMove: [origin, target],
       pieces: renderPieces(gameInstance),
