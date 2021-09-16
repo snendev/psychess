@@ -16,10 +16,13 @@ async function createClientBundle() {
 }
 
 const bundle = await createClientBundle()
+const styles = Deno.readTextFileSync('client/styles.css')
 
 function getFile(path: string) {
+  if (path === 'styles.css') return styles
   return bundle[`deno:///${path}`]
 }
+
 
 const html = `
 <!DOCTYPE html>
@@ -29,28 +32,7 @@ const html = `
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Psy(chic) Chess</title>
     <meta name="description" content="Wacky chess variant" />
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-      }
-
-      body, #root {
-        height: 100vh;
-        width: 100vw;
-      }
-
-      .main {
-        height: 100%;
-        width: 100%;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .frame {}
-    </style>
+    <link href="styles.css" rel="stylesheet" type="text/css">
   </head>
   <body>
     <div id="root">
