@@ -33,6 +33,16 @@ const html = `
     <title>Psy(chic) Chess</title>
     <meta name="description" content="Wacky chess variant" />
     <link href="styles.css" rel="stylesheet" type="text/css">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body, #root {
+        height: 100vh;
+        width: 100vw;
+      }
+    </style>
   </head>
   <body>
     <div id="root">

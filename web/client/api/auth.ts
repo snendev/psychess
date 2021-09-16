@@ -37,10 +37,6 @@ export async function loginBasic(email: string, password: string): Promise<strin
 export async function loginGoogle(): Promise<string> {
   // @ts-ignore deno does not recognize firebase.auth the way it is imported, but it exists
   const provider = new firebase.auth.GoogleAuthProvider();
-  try {
-    const {accessToken, credential, user} = await auth.signInWithPopup(provider)
-    return user.uid
-  } catch (e) {
-    throw e
-  }
+  const {accessToken, credential, user} = await auth.signInWithPopup(provider)
+  return user.uid
 }
