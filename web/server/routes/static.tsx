@@ -1,9 +1,5 @@
-import React from 'react'
-import ReactDOMServer from 'react-dom/server'
 import { contentType } from 'media-types'
 import { Router } from 'oak'
-
-import App from '~/client/App.tsx'
 
 async function createClientBundle() {
   const {files} = await Deno.emit('client/client.tsx', {
@@ -14,7 +10,7 @@ async function createClientBundle() {
       allowJs: true,
       jsx: "react",
       strictPropertyInitialization: false,
-    }
+    },
   })
   return files
 }
@@ -58,7 +54,6 @@ const html = `
   </head>
   <body>
     <div id="root">
-      ${(ReactDOMServer as any).renderToString(<App />)}
     </div>
     <script src="/bundle.js"></script>
   </body>

@@ -1,22 +1,29 @@
-import React from 'react';
+import React from 'react'
 
-import GameFrame from '~/client/chess/GameFrame.tsx'
+import assertNever from '~/common/assertNever.ts'
 
-function useIsMounted(): boolean {
-  const [hasMounted, setHasMounted] = React.useState(false)
-  React.useEffect(() => {
-    setHasMounted(true)
-  })
-  return hasMounted
+import Loading from './components/Loading.tsx'
+import GamePage from './page/GamePage.tsx'
+import LoginPage from './page/LoginPage.tsx'
+import { AuthProvider, useAuthHandle } from './user/auth.tsx'
+
+function AuthRouter() {
+  const auth = useAuthHandle()
+
+  switch (auth.loginState) {
+    case 'pending': return <Loading />
+    case 'logged-out': return <LoginPage />
+    case 'logged-in': return <GamePage />
+    default: return assertNever(auth)
+  }
 }
 
-function App() {
-  const isMounted = useIsMounted()
+export default function App() {
   return (
-    <main className="main">
-      {isMounted ? <GameFrame /> : <span>Loading...</span>}
-    </main>
+    <AuthProvider>
+      <main className="main">
+        <AuthRouter />
+      </main>
+    </AuthProvider>
   )
 }
-
-export default App
