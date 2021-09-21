@@ -54,11 +54,38 @@ impl std::fmt::Display for GameCompletionReason {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct BoardMove {
+pub struct MoveEvent {
     pub piece: BoardPiece,
     pub from: Position,
     pub to: Position,
     pub capture: Option<BoardPiece>,
+}
+
+impl From<MoveEvent> for String {
+    fn from(event: MoveEvent) -> Self {
+        let capture: bool = event.capture.is_some();
+        let piece_type_char: Option<char> = event.piece.piece.get_type().into();
+        let piece_char = if let Some(c) = piece_type_char {
+            Some(c)
+        } else {
+            event.from.get_file_char()
+        };
+
+        let subject_piece_str = if let Some(c) = piece_char {
+            c.to_string()
+        } else {
+            "".to_string()
+        };
+        let capture_str = if capture { "x" } else { "" };
+        let target_square_str = String::try_from(event.to).unwrap_or("".to_string());
+
+        format![
+            "{}{}{}",
+            subject_piece_str,
+            capture_str,
+            target_square_str,
+        ]
+    }
 }
 
 #[derive(Debug)]
@@ -71,14 +98,14 @@ pub struct GameResult {
 pub struct GameState {
     board: Board,
     captured_pieces: Vec<Piece>,
-    move_log: Vec<BoardMove>,
+    move_log: Vec<MoveEvent>,
     turn: Turn,
 }
 
 pub trait Chess {
     fn get_turn_color(&self) -> Color;
 
-    fn get_move_history(&self) -> &Vec<BoardMove>;
+    fn get_move_history(&self) -> &Vec<MoveEvent>;
 
     fn get_board(&self) -> &Board;
 
@@ -90,7 +117,7 @@ pub trait Chess {
         ignore_color: bool,
     ) -> Result<Vec<Position>, String>;
 
-    fn move_piece(&mut self, origin: Position, target: Position) -> Result<BoardMove, String>;
+    fn move_piece(&mut self, origin: Position, target: Position) -> Result<MoveEvent, String>;
 
     fn undo_last_move(&mut self) -> Result<(), String>;
 }
@@ -146,7 +173,7 @@ impl Chess for GameState {
         self.turn.get_color()
     }
 
-    fn get_move_history(&self) -> &Vec<BoardMove> {
+    fn get_move_history(&self) -> &Vec<MoveEvent> {
         &self.move_log
     }
 
@@ -196,7 +223,7 @@ impl Chess for GameState {
         }
     }
 
-    fn move_piece(&mut self, origin: Position, target: Position) -> Result<BoardMove, String> {
+    fn move_piece(&mut self, origin: Position, target: Position) -> Result<MoveEvent, String> {
         let maybe_piece = self.board.get_piece_at_position(origin);
         let moving_piece = match maybe_piece {
             Some(_piece) => _piece,
@@ -213,8 +240,8 @@ impl Chess for GameState {
         if valid_moves.contains(&target) {
             let captured_piece = self.board.move_piece(&moving_piece, target);
 
-            // create the BoardMove
-            let new_move = BoardMove {
+            // create the MoveEvent
+            let new_move = MoveEvent {
                 piece: moving_piece,
                 from: origin,
                 to: target,

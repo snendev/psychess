@@ -42,6 +42,12 @@ export class WasmClient {
 * @returns {Int32Array} 
 */
   render_board(): Int32Array;
+/**
+* Returns an array of move strings
+* @param {WasmClient} game 
+* @returns {any[]} 
+*/
+  static get_move_history(game: WasmClient): any[];
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -57,6 +63,7 @@ export interface InitOutput {
   readonly wasmclient_get_valid_targets: (a: number, b: number, c: number) => void;
   readonly wasmclient_is_white_turn: (a: number) => number;
   readonly wasmclient_render_board: (a: number, b: number) => void;
+  readonly wasmclient_get_move_history: (a: number, b: number) => void;
   readonly __wbindgen_free: (a: number, b: number) => void;
   readonly __wbindgen_malloc: (a: number) => number;
 }
