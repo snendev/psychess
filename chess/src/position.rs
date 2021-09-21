@@ -202,6 +202,20 @@ impl Position {
             .filter(|square| !square.is_off_board())
             .collect()
     }
+
+    pub fn get_file_char(self) -> Option<char> {
+        match self.col {
+            0 => Some('a'),
+            1 => Some('b'),
+            2 => Some('c'),
+            3 => Some('d'),
+            4 => Some('e'),
+            5 => Some('f'),
+            6 => Some('g'),
+            7 => Some('h'),
+            _ => None,
+        }
+    }
 }
 
 impl From<i32> for Position {
@@ -232,17 +246,7 @@ impl TryFrom<Position> for String {
     type Error = ();
 
     fn try_from(position: Position) -> Result<Self, Self::Error> {
-        let file = match position.col {
-            0 => Some("a"),
-            1 => Some("b"),
-            2 => Some("c"),
-            3 => Some("d"),
-            4 => Some("e"),
-            5 => Some("f"),
-            6 => Some("g"),
-            7 => Some("h"),
-            _ => None,
-        };
+        let file = position.get_file_char();
         if let Some(file) = file {
             if 0 > position.row || position.row > 7 {
                 Err(())

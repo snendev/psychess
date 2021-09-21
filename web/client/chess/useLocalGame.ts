@@ -54,7 +54,7 @@ export default function useLocalGame(options: GameOptions = DEFAULT_OPTIONS): Ga
     const {current: gameInstance} = gameInstanceRef
     if (!gameInstance) return
     if (getTurn(gameInstance) !== turn) return
-    
+
     const ok = gameInstance.move_piece(
       getPositionIndex(origin),
       getPositionIndex(target),

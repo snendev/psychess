@@ -136,12 +136,10 @@ export default class Game {
     this.clients = newList
   }
 
-  render = () => {
-    return {
-      pieces: renderPieces(this._instance),
-      turn: getTurn(this._instance),
-    }
-  }
+  render = () => ({
+    pieces: renderPieces(this._instance),
+    turn: getTurn(this._instance),
+  })
 
   publish = (data: {}) => {
     for (let i = 0; i < this.clients.length; i++) {
