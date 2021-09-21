@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-use crate::board::{Board, BoardMove, BoardPiece};
+use crate::board::{Board, BoardPiece};
 use crate::piece::{Color, Piece, PieceType};
 use crate::position::Position;
 
@@ -53,6 +53,14 @@ impl std::fmt::Display for GameCompletionReason {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct BoardMove {
+    pub piece: BoardPiece,
+    pub from: Position,
+    pub to: Position,
+    pub capture: Option<BoardPiece>,
+}
+
 #[derive(Debug)]
 pub struct GameResult {
     pub reason: GameCompletionReason,
@@ -83,6 +91,8 @@ pub trait Chess {
     ) -> Result<Vec<Position>, String>;
 
     fn move_piece(&mut self, origin: Position, target: Position) -> Result<BoardMove, String>;
+
+    fn undo_last_move(&mut self) -> Result<(), String>;
 }
 
 impl Default for GameState {
@@ -193,25 +203,45 @@ impl Chess for GameState {
             None => return Err("No piece to move at selected origin.".to_string()),
         };
 
+        eprintln!(
+            "[commit_move]: {} -> {}",
+            moving_piece,
+            String::try_from(target).unwrap_or("?".to_string()),
+        );
+
         let valid_moves = self.board.get_valid_targets(&moving_piece);
         if valid_moves.contains(&target) {
-            let board_move = self.board.commit_move(&moving_piece, target);
-            if let Some(board_move) = board_move {
-                // TODO test: does this work?
-                // let mut captures = self.captured_pieces.iter_mut();
-                let mut captures = self.captured_pieces.clone();
-                if let Some(captured_piece) = board_move.capture {
-                    captures.push(captured_piece.piece)
-                }
-                self.move_log.push(board_move);
-                self.captured_pieces = captures;
-                self.turn.increment();
-                Ok(board_move)
-            } else {
-                Err("Invalid move.".to_string())
+            let captured_piece = self.board.move_piece(&moving_piece, target);
+
+            // create the BoardMove
+            let new_move = BoardMove {
+                piece: moving_piece,
+                from: origin,
+                to: target,
+                capture: captured_piece,
+            };
+
+            if let Some(captured_piece) = new_move.capture {
+                self.captured_pieces.push(captured_piece.piece)
             }
+            self.move_log.push(new_move);
+            self.turn.increment();
+            Ok(new_move)
         } else {
             Err("Target is not a valid move for selected piece.".to_string())
+        }
+    }
+
+    fn undo_last_move(&mut self) -> Result<(), String> {
+        let last_board_move = self.move_log.pop();
+        if let Some(last_move) = last_board_move {
+            self.board.move_piece(&last_move.piece, last_move.from);
+            if let Some(captured_piece) = last_move.capture {
+                self.board.place_piece(captured_piece, last_move.to);
+            }
+            Ok(())
+        } else {
+            Err("Cannot undo: No moves have been made yet.".to_string())
         }
     }
 }

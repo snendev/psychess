@@ -68,7 +68,7 @@ const ROOK_DIRECTIONS: [Position; 4] = [
     Position { row: 0, col: -1 },
 ];
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct BoardPiece {
     pub piece: Piece,
     // the starting position of the piece is used as a uid
@@ -89,18 +89,10 @@ impl std::fmt::Display for BoardPiece {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
-pub struct BoardMove {
-    pub piece: Piece,
-    pub origin: Position,
-    pub target: Position,
-    pub capture: Option<BoardPiece>,
-}
-
 pub struct Board {
     pieces: Vec<BoardPiece>,
-    // map from piece keys (starting positions) to current location
-    squares: HashMap<Position, Position>,
+    // map from piece keys (BoardPieces) to current location
+    squares: HashMap<BoardPiece, Position>,
 }
 
 impl Board {
@@ -109,7 +101,7 @@ impl Board {
             squares: pieces
                 .clone()
                 .iter()
-                .map(|p| (p.origin, p.origin))
+                .map(|p| (*p, p.origin))
                 .collect(),
             pieces,
         }
@@ -118,7 +110,7 @@ impl Board {
     pub fn get_piece_at_position(&self, square: Position) -> Option<BoardPiece> {
         let collider =
             self.pieces.clone().into_iter().find(|piece| {
-                *self.squares.get(&piece.origin).unwrap_or(&position::ZERO) == square
+                *self.squares.get(&piece).unwrap_or(&position::ZERO) == square
             });
 
         if let Some(piece) = collider {
@@ -183,48 +175,35 @@ impl Board {
         }
     }
 
-    pub fn commit_move(&mut self, piece: &BoardPiece, target: Position) -> Option<BoardMove> {
-        let is_valid = self
-            .get_valid_targets(piece)
-            .iter()
-            .any(|square| *square == target);
-
-        eprintln!(
-            "[commit_move]: {} -> {}",
-            piece,
-            String::try_from(target).unwrap_or("?".to_string()),
-        );
-
-        if is_valid {
-            let captured_piece = &self.get_piece_at_position(target);
-
-            // if a piece is about to be captured, clean it up first
-            if let Some(captured_piece) = captured_piece {
-                let captured_index = self
-                    .pieces
-                    .iter()
-                    .position(|p| self.get_piece_position(p).unwrap() == target);
-                self.squares.remove(&captured_piece.origin);
-                if let Some(i) = captured_index {
-                    self.pieces.remove(i);
-                }
-            }
-
-            // set the new piece square
-            self.squares.insert(piece.origin, target);
-
-            // register the BoardMove
-            let new_move = BoardMove {
-                piece: piece.piece,
-                origin: piece.origin,
-                target,
-                capture: *captured_piece,
-            };
-
-            Some(new_move)
+    pub fn place_piece(&mut self, piece: BoardPiece, target: Position) -> Option<BoardPiece> {
+        if self.get_piece_at_position(target).is_none() {
+            self.pieces.push(piece);
+            self.squares.insert(piece, target);
+            Some(piece)
         } else {
             None
         }
+    }
+
+    pub fn move_piece(&mut self, piece: &BoardPiece, target: Position) -> Option<BoardPiece> {
+        let captured_piece = &self.get_piece_at_position(target);
+
+        // if a piece is about to be captured, clean it up first
+        if let Some(captured_piece) = captured_piece {
+            let captured_index = self
+                .pieces
+                .iter()
+                .position(|p| self.get_piece_position(p).unwrap() == target);
+            self.squares.remove(&captured_piece);
+            if let Some(i) = captured_index {
+                self.pieces.remove(i);
+            }
+        }
+
+        // set the new piece square
+        self.squares.insert(*piece, target);
+
+        *captured_piece
     }
 
     pub fn render(&self) -> [Option<Piece>; 64] {
@@ -241,7 +220,7 @@ impl Board {
     }
 
     fn get_piece_position(&self, piece: &BoardPiece) -> Option<Position> {
-        match self.squares.get(&piece.origin) {
+        match self.squares.get(&piece) {
             Some(position) => Some(*position),
             None => None,
         }
@@ -436,13 +415,7 @@ impl Default for Board {
             BoardPiece::new(piece::BLACK_PAWN, position::G7),
             BoardPiece::new(piece::BLACK_PAWN, position::H7),
         ];
-        let squares: HashMap<Position, Position> = pieces
-            .clone()
-            .iter()
-            .map(|piece| (piece.origin, piece.origin))
-            .collect();
-        let board = Board { pieces, squares };
-        board
+        Board::new(pieces)
     }
 }
 
@@ -484,13 +457,7 @@ impl Board {
             BoardPiece::new(piece::BLACK_PAWN, position::G7),
             BoardPiece::new(piece::BLACK_PAWN, position::H7),
         ];
-        let squares: HashMap<Position, Position> = pieces
-            .clone()
-            .iter()
-            .map(|piece| (piece.origin, piece.origin))
-            .collect();
-        let board = Board { pieces, squares };
-        board
+        Board::new(pieces)
     }
 }
 
