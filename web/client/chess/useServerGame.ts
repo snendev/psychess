@@ -1,9 +1,10 @@
 import React from 'react'
 import useWebSocket from 'react-use-websocket'
 
-import {Board, Position} from '~/common/chess/board.ts'
-import {Color} from '~/common/chess/pieces.ts'
+import {Position} from '~/common/chess/board.ts'
 import {createBoard, getMoves} from '~/common/chess/wasm_utils.ts'
+
+import type {Game, GameState} from './types.ts'
 
 function shouldReconnect() {
   console.log('Reconnecting...')
@@ -15,38 +16,20 @@ type AsyncHandle<T> =
   | { status: 'connecting' }
   | { status: 'connected'; handle: T}
 
-interface Game {
-  pieces: Board['pieces']
-  lastMove: [Position, Position] | null
-  myColor: Color
-  // validTargets: Square[]
-  turn: Color
-
-  getValidTargets: (position: Position) => Position[]
-  // one-way requests; have to receive responses in onMessage
-  movePiece: (origin: Position, target: Position) => void
-}
-
-interface GameHookState {
-  pieces: Board['pieces'] | null
-  myColor: Color
-  lastMove: [Position, Position] | null
-  turn: Color
-}
-
-const initialState: GameHookState = {
-  pieces: null,
-  myColor: 'white',
+const initialState: GameState = {
+  pieces: {},
   lastMove: null,
+  moveLog: [],
+  myColor: 'white',
   turn: 'white',
 }
 
 type GameHookAction =
-  | { type: 'update' } & Partial<GameHookState>
+  | { type: 'update' } & Partial<GameState>
   | { type: 'close' }
   | { type: 'remove-targets' }
 
-function reducer(state: GameHookState, action: GameHookAction): GameHookState {
+function reducer(state: GameState, action: GameHookAction): GameState {
   switch (action.type) {
     case 'update': {
       // TODO deeper equality checks here
@@ -54,14 +37,16 @@ function reducer(state: GameHookState, action: GameHookAction): GameHookState {
         pieces: action.pieces ?? state.pieces,
         myColor: action.myColor ?? state.myColor,
         lastMove: action.lastMove ?? state.lastMove,
+        moveLog: action.moveLog ?? state.moveLog,
         turn: action.turn ?? state.turn,
       }
     }
     case 'close': {
       return {
-        pieces: null,
+        pieces: {},
         myColor: 'white',
         lastMove: null,
+        moveLog: [],
         turn: 'white',
       }
     }
@@ -72,12 +57,10 @@ function reducer(state: GameHookState, action: GameHookAction): GameHookState {
   }
 }
 
-interface GameOptions {}
-
-export default function useServerGame(options?: GameOptions): AsyncHandle<Game> {
+export default function useServerGame(): AsyncHandle<Game> {
   const [state, dispatch] = React.useReducer(reducer, initialState)
 
-  const {pieces, lastMove, myColor, turn} = state
+  const {pieces, lastMove, moveLog, myColor, turn} = state
 
   const onMessage = React.useCallback((message: WebSocketEventMap['message']) => {
     const data = JSON.parse(message.data)
@@ -112,7 +95,7 @@ export default function useServerGame(options?: GameOptions): AsyncHandle<Game> 
 
   const getValidTargets = React.useCallback((position: Position): Position[] => {
     // turn does not matter since getMoves will ignore it anyway
-    const localGame = createBoard({pieces, turn: 'white'})
+    const localGame = createBoard(pieces ? {pieces, turn: 'white'} : null)
     return getMoves(localGame, position)
   }, [pieces])
 
@@ -122,6 +105,7 @@ export default function useServerGame(options?: GameOptions): AsyncHandle<Game> 
         ? ({
             pieces,
             lastMove,
+            moveLog,
             myColor,
             turn,
             getValidTargets,

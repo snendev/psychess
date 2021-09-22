@@ -1,51 +1,35 @@
 import React from 'react'
 
-import {Board, Position, getPositionIndex} from '~/common/chess/board.ts'
-import {Color} from '~/common/chess/pieces.ts'
+import {Position, getPositionIndex} from '~/common/chess/board.ts'
 import {createBoard, getMoves, getTurn, renderPieces} from '~/common/chess/wasm_utils.ts'
+import { WasmClient } from '~/common/wasm/wasm_chess.js'
 
-interface Game {
-  pieces: Board['pieces']
-  lastMove: [Position, Position] | null
-  turn: Color
-  getValidTargets: (position: Position) => Position[]
-  movePiece: (origin: Position, target: Position) => void
-}
-
-interface GameState {
-  pieces: Board['pieces'] | null
-  lastMove: [Position, Position] | null
-  turn: Color
-}
+import type {Game, GameState} from './types.ts'
 
 const initialState: GameState = {
   pieces: null,
   lastMove: null,
+  moveLog: [],
+  myColor: 'white',
   turn: 'white',
 }
 
-interface GameOptions {
-  color: Color
-}
-
-const DEFAULT_OPTIONS = {
-  color: 'white',
-}
-
-export default function useLocalGame(options: GameOptions = DEFAULT_OPTIONS): Game {
+export default function useLocalGame(): Game {
   const [state, setState] = React.useState(initialState)
 
-  const {pieces, lastMove, turn} = state
+  const {pieces, lastMove, moveLog, myColor, turn} = state
 
-  const gameInstanceRef = React.useRef()
+  const gameInstanceRef = React.useRef<WasmClient>()
 
   // initialize game instance
   React.useEffect(() => {
-    const board = createBoard()
+    const board = createBoard(null)
     gameInstanceRef.current = board
     setState({
       pieces: renderPieces(board),
       turn: getTurn(board),
+      moveLog: board.get_move_history(),
+      myColor: 'white',
       lastMove: null,
     })
   }, [])
@@ -60,24 +44,29 @@ export default function useLocalGame(options: GameOptions = DEFAULT_OPTIONS): Ga
       getPositionIndex(target),
     )
     if (!ok) return
+    const currentTurn = getTurn(gameInstance)
     setState({
       lastMove: [origin, target],
+      moveLog: gameInstance.get_move_history(),
       pieces: renderPieces(gameInstance),
-      turn: getTurn(gameInstance),
+      myColor: currentTurn,
+      turn: currentTurn,
     })
   }, [turn])
 
   const getValidTargets = React.useCallback((position: Position) => {
     const {current: gameInstance} = gameInstanceRef
-    if (!gameInstance) return
+    if (!gameInstance) return []
     return getMoves(gameInstance, position)
   }, [])
 
   const handle = React.useMemo<Game>(
     () => ({
-      pieces,
+      pieces: pieces ?? {},
       lastMove,
       turn,
+      moveLog,
+      myColor,
       getValidTargets,
       movePiece,
     }),
