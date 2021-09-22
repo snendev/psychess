@@ -6,6 +6,7 @@ export interface GameState {
   lastMove: [Position, Position] | null
   moveLog: string[]
   myColor: Color
+  opponentName: string
   turn: Color
 }
 

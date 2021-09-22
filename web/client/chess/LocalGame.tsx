@@ -14,6 +14,7 @@ export default function LocalGame(): JSX.Element {
         lastMove={game.lastMove}
         moveLog={game.moveLog}
         myColor="white"
+        opponentName=""
         turn={game.turn}
         getValidTargets={game.getValidTargets}
         movePiece={game.movePiece}

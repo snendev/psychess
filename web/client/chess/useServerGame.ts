@@ -4,6 +4,8 @@ import useWebSocket from 'react-use-websocket'
 import {Position} from '~/common/chess/board.ts'
 import {createBoard, getMoves} from '~/common/chess/wasm_utils.ts'
 
+import { useUser } from '../user.tsx'
+
 import type {Game, GameState} from './types.ts'
 
 function shouldReconnect() {
@@ -21,6 +23,7 @@ const initialState: GameState = {
   lastMove: null,
   moveLog: [],
   myColor: 'white',
+  opponentName: '',
   turn: 'white',
 }
 
@@ -39,14 +42,16 @@ function reducer(state: GameState, action: GameHookAction): GameState {
         lastMove: action.lastMove ?? state.lastMove,
         moveLog: action.moveLog ?? state.moveLog,
         turn: action.turn ?? state.turn,
+        opponentName: action.opponentName ?? state.opponentName,
       }
     }
     case 'close': {
       return {
         pieces: {},
-        myColor: 'white',
         lastMove: null,
         moveLog: [],
+        myColor: 'white',
+        opponentName: '',
         turn: 'white',
       }
     }
@@ -61,8 +66,9 @@ type ServerGame = Omit<Game, 'undoMove'>
 
 export default function useServerGame(): AsyncHandle<ServerGame> {
   const [state, dispatch] = React.useReducer(reducer, initialState)
+  const {displayName: name} = useUser()
 
-  const {pieces, lastMove, moveLog, myColor, turn} = state
+  const {pieces, lastMove, moveLog, myColor, opponentName, turn} = state
 
   const onMessage = React.useCallback((message: WebSocketEventMap['message']) => {
     const data = JSON.parse(message.data)
@@ -83,7 +89,7 @@ export default function useServerGame(): AsyncHandle<ServerGame> {
   }, [])
 
   const url = React.useMemo(() =>
-    `wss://${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api/ws`,
+    `wss://${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/api/ws?name=${name}`,
     [],
   )
   const socket = useWebSocket(
@@ -120,6 +126,7 @@ export default function useServerGame(): AsyncHandle<ServerGame> {
             lastMove,
             moveLog,
             myColor,
+            opponentName,
             turn,
             getValidTargets,
             movePiece,

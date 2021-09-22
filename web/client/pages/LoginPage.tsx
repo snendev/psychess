@@ -7,8 +7,8 @@ import Page from '../components/Page.tsx'
 // https://developers.google.com/identity/branding-guidelines
 // https://developers.google.com/identity/sign-in/web/sign-in
 function GoogleLoginButton() {
-  const onClick = React.useCallback(() => {
-    loginGoogle()
+  const onClick = React.useCallback(async () => {
+    await loginGoogle()
   }, [])
 
   return (
