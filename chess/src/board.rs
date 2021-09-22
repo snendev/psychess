@@ -6,7 +6,7 @@ use crate::{
         self, Color, Piece,
         PieceType::{self, Bishop, King, Knight, Pawn, Queen, Rook},
     },
-    position::{self, Position},
+    position::{Position, squares},
 };
 
 // enum BoardResult {
@@ -16,6 +16,7 @@ use crate::{
 //     Victory(Color),
 // }
 
+// TODO: this is a controller concern, not a "core" concern, right?
 // enum BoardOffer {
 //     Draw,
 //     Resign,
@@ -110,7 +111,7 @@ impl Board {
     pub fn get_piece_at_position(&self, square: Position) -> Option<BoardPiece> {
         let collider =
             self.pieces.clone().into_iter().find(|piece| {
-                *self.squares.get(&piece).unwrap_or(&position::ZERO) == square
+                *self.squares.get(&piece).unwrap_or(&squares::ZERO) == square
             });
 
         if let Some(piece) = collider {
@@ -381,39 +382,39 @@ impl Default for Board {
     fn default() -> Board {
         let pieces = vec![
             // white pieces
-            BoardPiece::new(piece::WHITE_ROOK, position::A1),
-            BoardPiece::new(piece::WHITE_KNIGHT, position::B1),
-            BoardPiece::new(piece::WHITE_BISHOP, position::C1),
-            BoardPiece::new(piece::WHITE_QUEEN, position::D1),
-            BoardPiece::new(piece::WHITE_KING, position::E1),
-            BoardPiece::new(piece::WHITE_BISHOP, position::F1),
-            BoardPiece::new(piece::WHITE_KNIGHT, position::G1),
-            BoardPiece::new(piece::WHITE_ROOK, position::H1),
-            BoardPiece::new(piece::WHITE_PAWN, position::A2),
-            BoardPiece::new(piece::WHITE_PAWN, position::B2),
-            BoardPiece::new(piece::WHITE_PAWN, position::C2),
-            BoardPiece::new(piece::WHITE_PAWN, position::D2),
-            BoardPiece::new(piece::WHITE_PAWN, position::E2),
-            BoardPiece::new(piece::WHITE_PAWN, position::F2),
-            BoardPiece::new(piece::WHITE_PAWN, position::G2),
-            BoardPiece::new(piece::WHITE_PAWN, position::H2),
+            BoardPiece::new(piece::WHITE_ROOK, squares::A1),
+            BoardPiece::new(piece::WHITE_KNIGHT, squares::B1),
+            BoardPiece::new(piece::WHITE_BISHOP, squares::C1),
+            BoardPiece::new(piece::WHITE_QUEEN, squares::D1),
+            BoardPiece::new(piece::WHITE_KING, squares::E1),
+            BoardPiece::new(piece::WHITE_BISHOP, squares::F1),
+            BoardPiece::new(piece::WHITE_KNIGHT, squares::G1),
+            BoardPiece::new(piece::WHITE_ROOK, squares::H1),
+            BoardPiece::new(piece::WHITE_PAWN, squares::A2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::B2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::C2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::D2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::E2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::F2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::G2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::H2),
             // black pieces
-            BoardPiece::new(piece::BLACK_ROOK, position::A8),
-            BoardPiece::new(piece::BLACK_KNIGHT, position::B8),
-            BoardPiece::new(piece::BLACK_BISHOP, position::C8),
-            BoardPiece::new(piece::BLACK_QUEEN, position::D8),
-            BoardPiece::new(piece::BLACK_KING, position::E8),
-            BoardPiece::new(piece::BLACK_BISHOP, position::F8),
-            BoardPiece::new(piece::BLACK_KNIGHT, position::G8),
-            BoardPiece::new(piece::BLACK_ROOK, position::H8),
-            BoardPiece::new(piece::BLACK_PAWN, position::A7),
-            BoardPiece::new(piece::BLACK_PAWN, position::B7),
-            BoardPiece::new(piece::BLACK_PAWN, position::C7),
-            BoardPiece::new(piece::BLACK_PAWN, position::D7),
-            BoardPiece::new(piece::BLACK_PAWN, position::E7),
-            BoardPiece::new(piece::BLACK_PAWN, position::F7),
-            BoardPiece::new(piece::BLACK_PAWN, position::G7),
-            BoardPiece::new(piece::BLACK_PAWN, position::H7),
+            BoardPiece::new(piece::BLACK_ROOK, squares::A8),
+            BoardPiece::new(piece::BLACK_KNIGHT, squares::B8),
+            BoardPiece::new(piece::BLACK_BISHOP, squares::C8),
+            BoardPiece::new(piece::BLACK_QUEEN, squares::D8),
+            BoardPiece::new(piece::BLACK_KING, squares::E8),
+            BoardPiece::new(piece::BLACK_BISHOP, squares::F8),
+            BoardPiece::new(piece::BLACK_KNIGHT, squares::G8),
+            BoardPiece::new(piece::BLACK_ROOK, squares::H8),
+            BoardPiece::new(piece::BLACK_PAWN, squares::A7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::B7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::C7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::D7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::E7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::F7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::G7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::H7),
         ];
         Board::new(pieces)
     }
@@ -423,39 +424,39 @@ impl Board {
     pub fn init_variant() -> Self {
         let pieces = vec![
             // white pieces
-            BoardPiece::new(piece::WHITE_ROOK, position::A1),
-            BoardPiece::new(piece::WHITE_BISHOP, position::C1),
-            BoardPiece::new(piece::WHITE_QUEEN, position::D1),
-            BoardPiece::new(piece::WHITE_KING, position::E1),
-            BoardPiece::new(piece::WHITE_BISHOP, position::F1),
-            BoardPiece::new(piece::WHITE_ROOK, position::H1),
-            BoardPiece::new(piece::WHITE_KNIGHT, position::D2),
-            BoardPiece::new(piece::WHITE_KNIGHT, position::E2),
-            BoardPiece::new(piece::WHITE_PAWN, position::A2),
-            BoardPiece::new(piece::WHITE_PAWN, position::B2),
-            BoardPiece::new(piece::WHITE_PAWN, position::C2),
-            BoardPiece::new(piece::WHITE_PAWN, position::D3),
-            BoardPiece::new(piece::WHITE_PAWN, position::E3),
-            BoardPiece::new(piece::WHITE_PAWN, position::F2),
-            BoardPiece::new(piece::WHITE_PAWN, position::G2),
-            BoardPiece::new(piece::WHITE_PAWN, position::H2),
+            BoardPiece::new(piece::WHITE_ROOK, squares::A1),
+            BoardPiece::new(piece::WHITE_BISHOP, squares::C1),
+            BoardPiece::new(piece::WHITE_QUEEN, squares::D1),
+            BoardPiece::new(piece::WHITE_KING, squares::E1),
+            BoardPiece::new(piece::WHITE_BISHOP, squares::F1),
+            BoardPiece::new(piece::WHITE_ROOK, squares::H1),
+            BoardPiece::new(piece::WHITE_KNIGHT, squares::D2),
+            BoardPiece::new(piece::WHITE_KNIGHT, squares::E2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::A2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::B2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::C2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::D3),
+            BoardPiece::new(piece::WHITE_PAWN, squares::E3),
+            BoardPiece::new(piece::WHITE_PAWN, squares::F2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::G2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::H2),
             // black pieces
-            BoardPiece::new(piece::BLACK_ROOK, position::A8),
-            BoardPiece::new(piece::BLACK_BISHOP, position::C8),
-            BoardPiece::new(piece::BLACK_QUEEN, position::D8),
-            BoardPiece::new(piece::BLACK_KING, position::E8),
-            BoardPiece::new(piece::BLACK_BISHOP, position::F8),
-            BoardPiece::new(piece::BLACK_ROOK, position::H8),
-            BoardPiece::new(piece::BLACK_KNIGHT, position::D7),
-            BoardPiece::new(piece::BLACK_KNIGHT, position::E7),
-            BoardPiece::new(piece::BLACK_PAWN, position::A7),
-            BoardPiece::new(piece::BLACK_PAWN, position::B7),
-            BoardPiece::new(piece::BLACK_PAWN, position::C7),
-            BoardPiece::new(piece::BLACK_PAWN, position::D6),
-            BoardPiece::new(piece::BLACK_PAWN, position::E6),
-            BoardPiece::new(piece::BLACK_PAWN, position::F7),
-            BoardPiece::new(piece::BLACK_PAWN, position::G7),
-            BoardPiece::new(piece::BLACK_PAWN, position::H7),
+            BoardPiece::new(piece::BLACK_ROOK, squares::A8),
+            BoardPiece::new(piece::BLACK_BISHOP, squares::C8),
+            BoardPiece::new(piece::BLACK_QUEEN, squares::D8),
+            BoardPiece::new(piece::BLACK_KING, squares::E8),
+            BoardPiece::new(piece::BLACK_BISHOP, squares::F8),
+            BoardPiece::new(piece::BLACK_ROOK, squares::H8),
+            BoardPiece::new(piece::BLACK_KNIGHT, squares::D7),
+            BoardPiece::new(piece::BLACK_KNIGHT, squares::E7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::A7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::B7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::C7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::D6),
+            BoardPiece::new(piece::BLACK_PAWN, squares::E6),
+            BoardPiece::new(piece::BLACK_PAWN, squares::F7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::G7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::H7),
         ];
         Board::new(pieces)
     }
