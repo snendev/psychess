@@ -7,7 +7,7 @@ import { WasmClient } from '~/common/wasm/wasm_chess.js'
 import type {Game, GameState} from './types.ts'
 
 const initialState: GameState = {
-  pieces: null,
+  pieces: {},
   lastMove: null,
   moveLog: [],
   myColor: 'white',
