@@ -38,7 +38,6 @@ export default class Game {
   handleMessage = (player: Client, message: string) => {
     console.log(`${player.id} message: ${message}`)
     if (this.status === 'open') return
-
     const json = JSON.parse(message)
     if (!Object.keys(json).includes('type')) throw new Error()
 
