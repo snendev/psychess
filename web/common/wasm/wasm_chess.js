@@ -95,13 +95,6 @@ function getArrayI32FromWasm0(ptr, len) {
     return getInt32Memory0().subarray(ptr / 4, ptr / 4 + len);
 }
 
-function _assertClass(instance, klass) {
-    if (!(instance instanceof klass)) {
-        throw new Error(`expected instance of ${klass.name}`);
-    }
-    return instance.ptr;
-}
-
 function getObject(idx) { return heap[idx]; }
 
 function dropObject(idx) {
@@ -189,12 +182,11 @@ export class WasmClient {
     }
     /**
     * Returns an array of move strings
-    * @param {WasmClient} game
+    * TODO update to pass an array of MoveEvent as JSValue?
     * @returns {any[]}
     */
-    static get_move_history(game) {
-        _assertClass(game, WasmClient);
-        wasm.wasmclient_get_move_history(8, game.ptr);
+    get_move_history() {
+        wasm.wasmclient_get_move_history(8, this.ptr);
         var r0 = getInt32Memory0()[8 / 4 + 0];
         var r1 = getInt32Memory0()[8 / 4 + 1];
         var v0 = getArrayJsValueFromWasm0(r0, r1).slice();

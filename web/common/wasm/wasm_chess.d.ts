@@ -44,10 +44,10 @@ export class WasmClient {
   render_board(): Int32Array;
 /**
 * Returns an array of move strings
-* @param {WasmClient} game 
+* TODO update to pass an array of MoveEvent as JSValue?
 * @returns {any[]} 
 */
-  static get_move_history(game: WasmClient): any[];
+  get_move_history(): any[];
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
