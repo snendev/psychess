@@ -17,7 +17,7 @@ export default function LocalGame(): JSX.Element {
         turn={game.turn}
         getValidTargets={game.getValidTargets}
         movePiece={game.movePiece}
-        undoMove={game.undoMove}
+        // undoMove={game.undoMove}
       />
       {/* TODO: see this note */}
       <p>

@@ -60,11 +60,11 @@ export default function useLocalGame(): Game {
     return getMoves(gameInstance, position)
   }, [])
 
-  const undoMove = React.useCallback(() => {
-    const {current: gameInstance} = gameInstanceRef
-    if (!gameInstance) return
-    return gameInstance.undo_last_move()
-  }, [])
+  // const undoMove = React.useCallback(() => {
+  //   const {current: gameInstance} = gameInstanceRef
+  //   if (!gameInstance) return
+  //   return gameInstance.undo_last_move()
+  // }, [])
 
   const handle = React.useMemo<Game>(
     () => ({
@@ -75,7 +75,7 @@ export default function useLocalGame(): Game {
       myColor,
       getValidTargets,
       movePiece,
-      undoMove,
+      // undoMove,
     }),
     [pieces, lastMove, turn, getValidTargets, movePiece],
   )

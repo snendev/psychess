@@ -26,7 +26,7 @@ export default function ServerGame(): JSX.Element {
           turn={game.handle.turn}
           getValidTargets={game.handle.getValidTargets}
           movePiece={game.handle.movePiece}
-          undoMove={noop}
+          // undoMove={noop}
         />
       )
     : (

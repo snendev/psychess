@@ -12,7 +12,7 @@ export interface GameState {
 export interface GameActions {
   getValidTargets: (position: Position) => Position[]
   movePiece: (origin: Position, target: Position) => void
-  undoMove: () => void
+  // undoMove: () => void
 }
 
 export type Game = GameState & GameActions
