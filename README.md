@@ -52,6 +52,7 @@ The stack has a few key parts:
 - the core library, `/chess`: a rust implementation of the rules of PsychicChess
 - the terminal renderer, `/terminal`: a rust binary app for playing PsychicChess in terminal
     - not recently tested, might be buggy
+- `/scripts`: utility scripts to show how modules are built, run locally, and deployed
 - the wasm build lib, `/wasm`: a wasm wrapper for engaging with core code in any wasm-friendly env
     - `/scripts/build.sh` outputs this build into the appropriate directory in `/web` and can copy it elsewhere.
 - the web application, `/web`: a deno/oak/react app using firebase
