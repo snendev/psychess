@@ -57,7 +57,9 @@ function reducer(state: GameState, action: GameHookAction): GameState {
   }
 }
 
-export default function useServerGame(): AsyncHandle<Game> {
+type ServerGame = Omit<Game, 'undoMove'>
+
+export default function useServerGame(): AsyncHandle<ServerGame> {
   const [state, dispatch] = React.useReducer(reducer, initialState)
 
   const {pieces, lastMove, moveLog, myColor, turn} = state
@@ -99,7 +101,7 @@ export default function useServerGame(): AsyncHandle<Game> {
     return getMoves(localGame, position)
   }, [pieces])
 
-  const handle = React.useMemo<Game | null>(
+  const handle = React.useMemo<ServerGame | null>(
     () =>
       pieces
         ? ({

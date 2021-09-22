@@ -9,12 +9,10 @@ export interface GameState {
   turn: Color
 }
 
-export interface Game {
-  pieces: Board['pieces']
-  lastMove: [Position, Position] | null
-  moveLog: string[]
-  myColor: Color
-  turn: Color
+export interface GameActions {
   getValidTargets: (position: Position) => Position[]
   movePiece: (origin: Position, target: Position) => void
+  undoMove: () => void
 }
+
+export type Game = GameState & GameActions
