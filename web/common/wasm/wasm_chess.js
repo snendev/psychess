@@ -193,11 +193,6 @@ export class WasmClient {
         wasm.__wbindgen_free(r0, r1 * 4);
         return v0;
     }
-    /**
-    */
-    undo_last_move() {
-        wasm.wasmclient_undo_last_move(this.ptr);
-    }
 }
 
 async function load(module, imports) {
