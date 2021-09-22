@@ -10,5 +10,6 @@ export function wasmclient_move_piece(a: number, b: number, c: number): number;
 export function wasmclient_get_valid_targets(a: number, b: number, c: number): void;
 export function wasmclient_is_white_turn(a: number): number;
 export function wasmclient_render_board(a: number, b: number): void;
+export function wasmclient_get_move_history(a: number, b: number): void;
 export function __wbindgen_free(a: number, b: number): void;
 export function __wbindgen_malloc(a: number): number;

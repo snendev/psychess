@@ -1,6 +1,6 @@
 use std::convert::TryFrom;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Color {
     White,
     Black,
@@ -27,7 +27,7 @@ impl std::fmt::Display for Color {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum PieceType {
     King,
     Queen,
@@ -51,7 +51,21 @@ impl std::fmt::Display for PieceType {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+// Piece-type characters for move logs
+impl From<PieceType> for Option<char> {
+    fn from(piece: PieceType) -> Self {
+        match piece {
+            PieceType::King => Some('K'),
+            PieceType::Queen => Some('Q'),
+            PieceType::Rook => Some('R'),
+            PieceType::Bishop => Some('B'),
+            PieceType::Knight => Some('N'),
+            PieceType::Pawn => None,
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Piece {
     color: Color,
     piece_type: PieceType,

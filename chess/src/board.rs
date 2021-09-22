@@ -6,7 +6,7 @@ use crate::{
         self, Color, Piece,
         PieceType::{self, Bishop, King, Knight, Pawn, Queen, Rook},
     },
-    position::{self, Position},
+    position::{Position, squares},
 };
 
 // enum BoardResult {
@@ -16,6 +16,7 @@ use crate::{
 //     Victory(Color),
 // }
 
+// TODO: this is a controller concern, not a "core" concern, right?
 // enum BoardOffer {
 //     Draw,
 //     Resign,
@@ -23,36 +24,6 @@ use crate::{
 // }
 
 pub type PowerMap = HashMap<String, Vec<PieceType>>;
-
-fn print_map(map: PowerMap, color: Color, show_board_flipped: bool) -> String {
-    let mut grid = String::new();
-    for i in 0..8 {
-        for j in 0..8 {
-            // TODO TEST FOR MIRRORED
-            let position = Position { row: i, col: j };
-            let position = if show_board_flipped {
-                position.flip().unwrap()
-            } else {
-                position
-            };
-            let key = String::try_from(position).unwrap();
-            let powers = map.get(&key);
-            if let Some(powers) = powers {
-                for power in powers {
-                    let piece = Piece::new(color, *power);
-                    grid.push(char::from(&piece));
-                    grid.push(' ');
-                }
-                grid.push(',');
-            } else {
-                grid = grid + "  ,";
-            }
-        }
-        grid.push('\r');
-        grid.push('\n');
-    }
-    grid
-}
 
 const BISHOP_DIRECTIONS: [Position; 4] = [
     Position { row: 1, col: 1 },
@@ -68,7 +39,7 @@ const ROOK_DIRECTIONS: [Position; 4] = [
     Position { row: 0, col: -1 },
 ];
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct BoardPiece {
     pub piece: Piece,
     // the starting position of the piece is used as a uid
@@ -89,18 +60,10 @@ impl std::fmt::Display for BoardPiece {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
-pub struct BoardMove {
-    pub piece: Piece,
-    pub origin: Position,
-    pub target: Position,
-    pub capture: Option<BoardPiece>,
-}
-
 pub struct Board {
     pieces: Vec<BoardPiece>,
-    // map from piece keys (starting positions) to current location
-    squares: HashMap<Position, Position>,
+    // map from piece keys (BoardPieces) to current location
+    squares: HashMap<BoardPiece, Position>,
 }
 
 impl Board {
@@ -109,7 +72,7 @@ impl Board {
             squares: pieces
                 .clone()
                 .iter()
-                .map(|p| (p.origin, p.origin))
+                .map(|p| (*p, p.origin))
                 .collect(),
             pieces,
         }
@@ -118,7 +81,7 @@ impl Board {
     pub fn get_piece_at_position(&self, square: Position) -> Option<BoardPiece> {
         let collider =
             self.pieces.clone().into_iter().find(|piece| {
-                *self.squares.get(&piece.origin).unwrap_or(&position::ZERO) == square
+                *self.squares.get(&piece).unwrap_or(&squares::ZERO) == square
             });
 
         if let Some(piece) = collider {
@@ -183,48 +146,35 @@ impl Board {
         }
     }
 
-    pub fn commit_move(&mut self, piece: &BoardPiece, target: Position) -> Option<BoardMove> {
-        let is_valid = self
-            .get_valid_targets(piece)
-            .iter()
-            .any(|square| *square == target);
-
-        eprintln!(
-            "[commit_move]: {} -> {}",
-            piece,
-            String::try_from(target).unwrap_or("?".to_string()),
-        );
-
-        if is_valid {
-            let captured_piece = &self.get_piece_at_position(target);
-
-            // if a piece is about to be captured, clean it up first
-            if let Some(captured_piece) = captured_piece {
-                let captured_index = self
-                    .pieces
-                    .iter()
-                    .position(|p| self.get_piece_position(p).unwrap() == target);
-                self.squares.remove(&captured_piece.origin);
-                if let Some(i) = captured_index {
-                    self.pieces.remove(i);
-                }
-            }
-
-            // set the new piece square
-            self.squares.insert(piece.origin, target);
-
-            // register the BoardMove
-            let new_move = BoardMove {
-                piece: piece.piece,
-                origin: piece.origin,
-                target,
-                capture: *captured_piece,
-            };
-
-            Some(new_move)
+    pub fn place_piece(&mut self, piece: BoardPiece, target: Position) -> Option<BoardPiece> {
+        if self.get_piece_at_position(target).is_none() {
+            self.pieces.push(piece);
+            self.squares.insert(piece, target);
+            Some(piece)
         } else {
             None
         }
+    }
+
+    pub fn move_piece(&mut self, piece: &BoardPiece, target: Position) -> Option<BoardPiece> {
+        let captured_piece = &self.get_piece_at_position(target);
+
+        // if a piece is about to be captured, clean it up first
+        if let Some(captured_piece) = captured_piece {
+            let captured_index = self
+                .pieces
+                .iter()
+                .position(|p| self.get_piece_position(p).unwrap() == target);
+            self.squares.remove(&captured_piece);
+            if let Some(i) = captured_index {
+                self.pieces.remove(i);
+            }
+        }
+
+        // set the new piece square
+        self.squares.insert(*piece, target);
+
+        *captured_piece
     }
 
     pub fn render(&self) -> [Option<Piece>; 64] {
@@ -241,7 +191,7 @@ impl Board {
     }
 
     fn get_piece_position(&self, piece: &BoardPiece) -> Option<Position> {
-        match self.squares.get(&piece.origin) {
+        match self.squares.get(&piece) {
             Some(position) => Some(*position),
             None => None,
         }
@@ -360,7 +310,7 @@ impl Board {
         moves
     }
 
-    fn calculate_power_map(&self, color: Color) -> PowerMap {
+    pub fn calculate_power_map(&self, color: Color) -> PowerMap {
         let mut power_map = PowerMap::new();
 
         let mut push_targets = |piece_type: PieceType, targets: Vec<Position>| {
@@ -402,47 +352,41 @@ impl Default for Board {
     fn default() -> Board {
         let pieces = vec![
             // white pieces
-            BoardPiece::new(piece::WHITE_ROOK, position::A1),
-            BoardPiece::new(piece::WHITE_KNIGHT, position::B1),
-            BoardPiece::new(piece::WHITE_BISHOP, position::C1),
-            BoardPiece::new(piece::WHITE_QUEEN, position::D1),
-            BoardPiece::new(piece::WHITE_KING, position::E1),
-            BoardPiece::new(piece::WHITE_BISHOP, position::F1),
-            BoardPiece::new(piece::WHITE_KNIGHT, position::G1),
-            BoardPiece::new(piece::WHITE_ROOK, position::H1),
-            BoardPiece::new(piece::WHITE_PAWN, position::A2),
-            BoardPiece::new(piece::WHITE_PAWN, position::B2),
-            BoardPiece::new(piece::WHITE_PAWN, position::C2),
-            BoardPiece::new(piece::WHITE_PAWN, position::D2),
-            BoardPiece::new(piece::WHITE_PAWN, position::E2),
-            BoardPiece::new(piece::WHITE_PAWN, position::F2),
-            BoardPiece::new(piece::WHITE_PAWN, position::G2),
-            BoardPiece::new(piece::WHITE_PAWN, position::H2),
+            BoardPiece::new(piece::WHITE_ROOK, squares::A1),
+            BoardPiece::new(piece::WHITE_KNIGHT, squares::B1),
+            BoardPiece::new(piece::WHITE_BISHOP, squares::C1),
+            BoardPiece::new(piece::WHITE_QUEEN, squares::D1),
+            BoardPiece::new(piece::WHITE_KING, squares::E1),
+            BoardPiece::new(piece::WHITE_BISHOP, squares::F1),
+            BoardPiece::new(piece::WHITE_KNIGHT, squares::G1),
+            BoardPiece::new(piece::WHITE_ROOK, squares::H1),
+            BoardPiece::new(piece::WHITE_PAWN, squares::A2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::B2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::C2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::D2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::E2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::F2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::G2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::H2),
             // black pieces
-            BoardPiece::new(piece::BLACK_ROOK, position::A8),
-            BoardPiece::new(piece::BLACK_KNIGHT, position::B8),
-            BoardPiece::new(piece::BLACK_BISHOP, position::C8),
-            BoardPiece::new(piece::BLACK_QUEEN, position::D8),
-            BoardPiece::new(piece::BLACK_KING, position::E8),
-            BoardPiece::new(piece::BLACK_BISHOP, position::F8),
-            BoardPiece::new(piece::BLACK_KNIGHT, position::G8),
-            BoardPiece::new(piece::BLACK_ROOK, position::H8),
-            BoardPiece::new(piece::BLACK_PAWN, position::A7),
-            BoardPiece::new(piece::BLACK_PAWN, position::B7),
-            BoardPiece::new(piece::BLACK_PAWN, position::C7),
-            BoardPiece::new(piece::BLACK_PAWN, position::D7),
-            BoardPiece::new(piece::BLACK_PAWN, position::E7),
-            BoardPiece::new(piece::BLACK_PAWN, position::F7),
-            BoardPiece::new(piece::BLACK_PAWN, position::G7),
-            BoardPiece::new(piece::BLACK_PAWN, position::H7),
+            BoardPiece::new(piece::BLACK_ROOK, squares::A8),
+            BoardPiece::new(piece::BLACK_KNIGHT, squares::B8),
+            BoardPiece::new(piece::BLACK_BISHOP, squares::C8),
+            BoardPiece::new(piece::BLACK_QUEEN, squares::D8),
+            BoardPiece::new(piece::BLACK_KING, squares::E8),
+            BoardPiece::new(piece::BLACK_BISHOP, squares::F8),
+            BoardPiece::new(piece::BLACK_KNIGHT, squares::G8),
+            BoardPiece::new(piece::BLACK_ROOK, squares::H8),
+            BoardPiece::new(piece::BLACK_PAWN, squares::A7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::B7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::C7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::D7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::E7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::F7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::G7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::H7),
         ];
-        let squares: HashMap<Position, Position> = pieces
-            .clone()
-            .iter()
-            .map(|piece| (piece.origin, piece.origin))
-            .collect();
-        let board = Board { pieces, squares };
-        board
+        Board::new(pieces)
     }
 }
 
@@ -450,47 +394,41 @@ impl Board {
     pub fn init_variant() -> Self {
         let pieces = vec![
             // white pieces
-            BoardPiece::new(piece::WHITE_ROOK, position::A1),
-            BoardPiece::new(piece::WHITE_BISHOP, position::C1),
-            BoardPiece::new(piece::WHITE_QUEEN, position::D1),
-            BoardPiece::new(piece::WHITE_KING, position::E1),
-            BoardPiece::new(piece::WHITE_BISHOP, position::F1),
-            BoardPiece::new(piece::WHITE_ROOK, position::H1),
-            BoardPiece::new(piece::WHITE_KNIGHT, position::D2),
-            BoardPiece::new(piece::WHITE_KNIGHT, position::E2),
-            BoardPiece::new(piece::WHITE_PAWN, position::A2),
-            BoardPiece::new(piece::WHITE_PAWN, position::B2),
-            BoardPiece::new(piece::WHITE_PAWN, position::C2),
-            BoardPiece::new(piece::WHITE_PAWN, position::D3),
-            BoardPiece::new(piece::WHITE_PAWN, position::E3),
-            BoardPiece::new(piece::WHITE_PAWN, position::F2),
-            BoardPiece::new(piece::WHITE_PAWN, position::G2),
-            BoardPiece::new(piece::WHITE_PAWN, position::H2),
+            BoardPiece::new(piece::WHITE_ROOK, squares::A1),
+            BoardPiece::new(piece::WHITE_BISHOP, squares::C1),
+            BoardPiece::new(piece::WHITE_QUEEN, squares::D1),
+            BoardPiece::new(piece::WHITE_KING, squares::E1),
+            BoardPiece::new(piece::WHITE_BISHOP, squares::F1),
+            BoardPiece::new(piece::WHITE_ROOK, squares::H1),
+            BoardPiece::new(piece::WHITE_KNIGHT, squares::D2),
+            BoardPiece::new(piece::WHITE_KNIGHT, squares::E2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::A2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::B2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::C2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::D3),
+            BoardPiece::new(piece::WHITE_PAWN, squares::E3),
+            BoardPiece::new(piece::WHITE_PAWN, squares::F2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::G2),
+            BoardPiece::new(piece::WHITE_PAWN, squares::H2),
             // black pieces
-            BoardPiece::new(piece::BLACK_ROOK, position::A8),
-            BoardPiece::new(piece::BLACK_BISHOP, position::C8),
-            BoardPiece::new(piece::BLACK_QUEEN, position::D8),
-            BoardPiece::new(piece::BLACK_KING, position::E8),
-            BoardPiece::new(piece::BLACK_BISHOP, position::F8),
-            BoardPiece::new(piece::BLACK_ROOK, position::H8),
-            BoardPiece::new(piece::BLACK_KNIGHT, position::D7),
-            BoardPiece::new(piece::BLACK_KNIGHT, position::E7),
-            BoardPiece::new(piece::BLACK_PAWN, position::A7),
-            BoardPiece::new(piece::BLACK_PAWN, position::B7),
-            BoardPiece::new(piece::BLACK_PAWN, position::C7),
-            BoardPiece::new(piece::BLACK_PAWN, position::D6),
-            BoardPiece::new(piece::BLACK_PAWN, position::E6),
-            BoardPiece::new(piece::BLACK_PAWN, position::F7),
-            BoardPiece::new(piece::BLACK_PAWN, position::G7),
-            BoardPiece::new(piece::BLACK_PAWN, position::H7),
+            BoardPiece::new(piece::BLACK_ROOK, squares::A8),
+            BoardPiece::new(piece::BLACK_BISHOP, squares::C8),
+            BoardPiece::new(piece::BLACK_QUEEN, squares::D8),
+            BoardPiece::new(piece::BLACK_KING, squares::E8),
+            BoardPiece::new(piece::BLACK_BISHOP, squares::F8),
+            BoardPiece::new(piece::BLACK_ROOK, squares::H8),
+            BoardPiece::new(piece::BLACK_KNIGHT, squares::D7),
+            BoardPiece::new(piece::BLACK_KNIGHT, squares::E7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::A7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::B7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::C7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::D6),
+            BoardPiece::new(piece::BLACK_PAWN, squares::E6),
+            BoardPiece::new(piece::BLACK_PAWN, squares::F7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::G7),
+            BoardPiece::new(piece::BLACK_PAWN, squares::H7),
         ];
-        let squares: HashMap<Position, Position> = pieces
-            .clone()
-            .iter()
-            .map(|piece| (piece.origin, piece.origin))
-            .collect();
-        let board = Board { pieces, squares };
-        board
+        Board::new(pieces)
     }
 }
 

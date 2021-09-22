@@ -3,10 +3,10 @@ mod game;
 mod piece;
 mod position;
 
-pub use board::BoardPiece;
-pub use game::{Chess, GameState, Turn};
+pub use board::{BoardPiece, PowerMap};
+pub use game::{MoveEvent, Chess, GameState, Turn};
 pub use piece::{Color, Piece, PieceType};
-pub use position::{Position, PositionColor};
+pub use position::{Position, PositionColor, squares};
 
 pub mod pieces {
     pub use crate::piece::{

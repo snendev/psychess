@@ -7,7 +7,7 @@
     "firebase/auth": "https://cdn.skypack.dev/firebase@8.7.0/auth",
     "firebase/firestore": "https://cdn.skypack.dev/firebase@8.7.0/firestore",
     "media-types": "https://deno.land/x/media_types@v2.10.0/mod.ts",
-    "oak": "https://raw.githubusercontent.com/rotu/oak/ws/mod.ts",
+    "oak": "https://deno.land/x/oak@v9.0.1/mod.ts",
     "react": "https://cdn.esm.sh/react@17",
     "react-dom": "https://cdn.esm.sh/react-dom@17",
     "react-dom/": "https://cdn.esm.sh/react-dom@17/",

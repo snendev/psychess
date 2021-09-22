@@ -1,7 +1,16 @@
 use std::convert::{From, TryFrom};
 use wasm_bindgen::prelude::*;
 
-use psychess::{BoardPiece, Chess, Color, GameState, Piece, PieceType, Position, Turn};
+use psychess::{
+    BoardPiece,
+    Chess,
+    Color,
+    GameState,
+    Piece,
+    PieceType,
+    Position,
+    Turn,
+};
 
 // Code to enable using log("") fn that yields console.log() statements
 //
@@ -170,13 +179,20 @@ impl WasmClient {
             .collect::<Vec<i32>>()
             .into_boxed_slice()
     }
+
+    /// Returns an array of move strings
+    /// TODO update to pass an array of MoveEvent as JSValue?
+    pub fn get_move_history(&self) -> Box<[JsValue]> {
+        self.0
+            .get_move_history()
+            .iter()
+            .map(|&m| {
+                let str_value: String = m.into();
+                JsValue::from_str(&str_value[..])
+            })
+            .collect::<Vec<JsValue>>()
+            .into_boxed_slice()
+    }
+
+    // pub fn get_result(game: &WasmClient) -> Option<GameResult>;
 }
-
-// #[wasm_bindgen]
-// pub fn get_move_history(game: &WasmClient) -> &Vec<BoardMove>;
-
-// #[wasm_bindgen]
-// pub fn get_selection(game: &WasmClient) -> &Option<GameSelection>;
-
-// #[wasm_bindgen]
-// pub fn get_result(game: &WasmClient) -> Option<GameResult>;

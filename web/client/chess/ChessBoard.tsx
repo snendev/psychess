@@ -1,8 +1,10 @@
 import React from 'react'
 import ChessBoard from 'chessboardjsx'
 
-import {Board, Position, Square, getSquare, getPositionFromSquare} from '~/common/chess/board.ts'
+import {Board, Square, getSquare, getPositionFromSquare} from '~/common/chess/board.ts'
 import {Color, PieceCode} from '~/common/chess/pieces.ts'
+
+import {Game} from './types.ts'
 
 function determineOrientation(myColor: Color, invert: boolean): Color {
   const isWhite = myColor === 'white'
@@ -11,17 +13,16 @@ function determineOrientation(myColor: Color, invert: boolean): Color {
     : 'black'
 }
 
-interface BoardProps {
-  pieces: Board['pieces']
-  lastMove: [Position, Position] | null
-  movePiece: (origin: Position, target: Position) => void
-  getValidTargets: (target: Position) => Square[]
-  myColor: Color | null
-  turn: Color
+interface BoardProps extends Game {
+  boardIsInverted: boolean
 }
 
+/**
+ * Interface with ChessboardJSX chessboard element.
+ * Performs any required data transformations and establishes control handlers.
+ */
 export default function Board(
-  {pieces, lastMove, movePiece, myColor, turn, getValidTargets}: BoardProps,
+  {pieces, lastMove, movePiece, myColor, turn, boardIsInverted, getValidTargets}: BoardProps,
 ): JSX.Element {
   // bucket of arrows, highlights, etc.
   // const [features, setFeatures] = React.useState<[Square, Square | null][]>([])
@@ -29,8 +30,6 @@ export default function Board(
   // last selected square
   const [selectedSquare, setSelectedSquare] = React.useState<Square | null>(null)
   const [validTargets, setValidTargets] = React.useState<Square[]>([])
-
-  const [boardIsInverted, setBoardIsInverted] = React.useState(false)
 
   const allowDrag = React.useCallback(({piece}: {piece: PieceCode}) => {
     if (!myColor) return true
@@ -40,10 +39,14 @@ export default function Board(
 
   const handleSquareSelect = React.useCallback((target: Square) => {
     setValidTargets([])
-    if (!selectedSquare && pieces[target]) {
-      const targets = getValidTargets(getPositionFromSquare(target)).map(getSquare)
-      setSelectedSquare(target)
-      setValidTargets(targets)
+    if (!selectedSquare) {
+      if (pieces[target]) {
+        const targets = getValidTargets(getPositionFromSquare(target)).map(getSquare)
+        setSelectedSquare(target)
+        setValidTargets(targets)
+      } else {
+        setSelectedSquare(null)
+      }
       return
     }
     setSelectedSquare(null)
@@ -102,20 +105,15 @@ export default function Board(
   // the moved piece is now located.
 
   return (
-    <div>
-      <ChessBoard
-        allowDrag={allowDrag}
-        dropOffBoard="snapback"
-        id="play"
-        position={pieces}
-        onSquareClick={handleSquareSelect}
-        onDrop={handleDrop}
-        orientation={orientation}
-        squareStyles={squareStyles}
-      />
-      <button onClick={() => setBoardIsInverted((prev) => !prev)}>
-        flip board
-      </button>
-    </div>
+    <ChessBoard
+      allowDrag={allowDrag}
+      dropOffBoard="snapback"
+      id="play"
+      position={pieces}
+      onSquareClick={handleSquareSelect}
+      onDrop={handleDrop}
+      orientation={orientation}
+      squareStyles={squareStyles}
+    />
   )
 }
