@@ -48,6 +48,9 @@ export class WasmClient {
 * @returns {any[]} 
 */
   get_move_history(): any[];
+/**
+*/
+  undo_last_move(): void;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -64,6 +67,7 @@ export interface InitOutput {
   readonly wasmclient_is_white_turn: (a: number) => number;
   readonly wasmclient_render_board: (a: number, b: number) => void;
   readonly wasmclient_get_move_history: (a: number, b: number) => void;
+  readonly wasmclient_undo_last_move: (a: number) => void;
   readonly __wbindgen_free: (a: number, b: number) => void;
   readonly __wbindgen_malloc: (a: number) => number;
 }
