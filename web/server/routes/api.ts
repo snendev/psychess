@@ -37,7 +37,6 @@ apiRouter
   .get('/api/ws', async (context) => {
     if (!context.isUpgradable) throw new Error('Context not upgradable.')
     const ws = await context.upgrade()
-    console.log(context.params)
     handleSocket(ws, context.request.url.searchParams.get('name') ?? "(anonymous)")
   })
   .post('/api/getMoves', async (context) => {0

@@ -82,6 +82,15 @@ name = "psychess"
 version = "0.1.0"
 
 [[package]]
+name = "psychess-terminal-client"
+version = "0.1.0"
+dependencies = [
+ "psychess",
+ "rand",
+ "termion",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -157,15 +166,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-xid",
-]
-
-[[package]]
-name = "terminal-client"
-version = "0.1.0"
-dependencies = [
- "psychess",
- "rand",
- "termion",
 ]
 
 [[package]]
