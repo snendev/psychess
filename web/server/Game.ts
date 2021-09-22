@@ -5,6 +5,7 @@ import { getTurn, renderPieces } from '~/common/chess/wasm_utils.ts'
 export interface Client {
   id: string
   socket: WebSocket
+  name: string
 }
 
 export default class Game {
@@ -83,10 +84,20 @@ export default class Game {
     this.status = 'ready'
     const {pieces, turn} = this.render()
     this.clients[playerWhiteIndex].socket.send(
-      JSON.stringify({myColor: 'white', pieces, turn})
+      JSON.stringify({
+        myColor: 'white',
+        pieces,
+        turn,
+        opponentName: this.clients[playerBlackIndex].name,
+      })
     )
     this.clients[playerBlackIndex].socket.send(
-      JSON.stringify({myColor: 'black', pieces, turn})
+      JSON.stringify({
+        myColor: 'black',
+        pieces,
+        turn,
+        opponentName: this.clients[playerWhiteIndex].name,
+      })
     )
   }
 
@@ -104,7 +115,6 @@ export default class Game {
     })
     client.socket.addEventListener('close', (event) => {
       console.log(`${client.id} socket closed`)
-      console.log(event)
       const thisClientIndex = this.clients.findIndex((_client) => _client.id === client.id)
       this.clients.splice(thisClientIndex, 1)
 

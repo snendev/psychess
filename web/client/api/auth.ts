@@ -13,7 +13,7 @@ const app = firebase.initializeApp({
 const auth = app.auth()
 
 // auto-login
-export function subscribeToAuthState(handleUser: (user: {uid: string} | null) => void) {
+export function subscribeToAuthState(handleUser: (user: {uid: string; displayName: string} | null) => void) {
   return auth.onAuthStateChanged(handleUser)
 }
 

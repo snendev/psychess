@@ -4,9 +4,12 @@ import {Position, getPositionIndex} from '~/common/chess/board.ts'
 import {createBoard, getMoves, getTurn, renderPieces} from '~/common/chess/wasm_utils.ts'
 import { WasmClient } from '~/common/wasm/wasm_chess.js'
 
-import type {Game, GameState} from './types.ts'
+import type {GameActions, GameState} from './types.ts'
 
-const initialState: GameState = {
+type LocalGameState = Omit<GameState, 'opponentName'>
+type LocalGame = LocalGameState & GameActions
+
+const initialState: LocalGameState = {
   pieces: {},
   lastMove: null,
   moveLog: [],
@@ -14,7 +17,7 @@ const initialState: GameState = {
   turn: 'white',
 }
 
-export default function useLocalGame(): Game {
+export default function useLocalGame(): LocalGame {
   const [state, setState] = React.useState(initialState)
 
   const {pieces, lastMove, moveLog, myColor, turn} = state
@@ -66,7 +69,7 @@ export default function useLocalGame(): Game {
   //   return gameInstance.undo_last_move()
   // }, [])
 
-  const handle = React.useMemo<Game>(
+  const handle = React.useMemo<LocalGame>(
     () => ({
       pieces: pieces ?? {},
       lastMove,
