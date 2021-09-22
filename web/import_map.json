@@ -14,7 +14,7 @@
     "react-dom/": "https://cdn.esm.sh/react-dom@17/",
     "react-google-button": "https://cdn.esm.sh/react-google-button@0.7.2?deps=react@17",
     "react-use-websocket": "https://cdn.esm.sh/react-use-websocket@2.7?deps=react@17",
-    "sqlite": "https://deno.land/x/sqlite@3.1.1/mod.ts"
+    "sqlite": "https://deno.land/x/sqlite@v3.1.1/mod.ts"
   },
   "scopes": {}
 }

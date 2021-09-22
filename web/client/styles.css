@@ -62,3 +62,7 @@
 .move-log tr {
   height: 4em;
 };
+
+.move-log td {
+  width: 50%;
+}

@@ -194,5 +194,9 @@ impl WasmClient {
             .into_boxed_slice()
     }
 
+    // pub fn undo_last_move(&mut self) -> () {
+    //     self.0.undo_last_move().unwrap();
+    // }
+
     // pub fn get_result(game: &WasmClient) -> Option<GameResult>;
 }

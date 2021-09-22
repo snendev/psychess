@@ -2,8 +2,9 @@ import { Router } from 'oak'
 
 import { getMoves } from '~/common/chess/wasm_utils.ts'
 
-import Store from './api/Store.ts'
-import Game from './api/Game.ts'
+import Store from '../Store.ts'
+import Game from '../Game.ts'
+import { createUserProfile, getUserProfile } from '../db.ts'
 
 const store = new Store<Game>("id")
 
@@ -46,6 +47,28 @@ apiRouter
     const targets = getMoves(pieces, query)
     context.response.headers.set("Content-Type", "application/json") 
     context.response.body = {pieces, query, turn, targets}
+  })
+  .get('/api/user/:id', (context) => {
+    const id = context.params.id
+    if (!id) return
+    const foundUser = getUserProfile(id)
+    context.response.headers.set("Content-Type", "application/json")
+    context.response.body = {user: foundUser}
+  })
+  .post('/api/user', async (context) => {
+    const json = context.request.body()
+    const {id, displayName} = JSON.parse(await json.value)
+    if (!id) return
+    const result = createUserProfile(id, displayName)
+    if (!result) {
+      // conflict exists
+      context.response.status = 303
+      return
+    }
+    context.response.status = 200
+    context.response.headers.set("Content-Type", "application/json")
+    context.response.body = result
+    return
   })
 
 export default apiRouter

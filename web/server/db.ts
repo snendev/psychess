@@ -12,10 +12,15 @@ export function initDB(): void {
   db.close()
 }
 
-export function createUserProfile(id: string, name: string): void {
+export function createUserProfile(id: string, name: string): UserProfile | null {
   const db = new DB("test.db");
-  db.query(`INSERT INTO users (id,display_name) VALUES ($${id}, ${name})`)
-  db.close()
+  const conflict = db.query(`SELECT * FROM users WHERE id = ${id}`) as UserProfileRow[]
+  if (conflict.length !== 0) {
+    db.close()
+    return null
+  }
+  db.query(`INSERT INTO users (id,display_name) VALUES (${id}, ${name})`)
+  return {displayName: name}
 }
 
 export function getUserProfile(id: string): UserProfile | null {
