@@ -64,24 +64,16 @@ pub struct MoveEvent {
 impl From<MoveEvent> for String {
     fn from(event: MoveEvent) -> Self {
         let capture: bool = event.capture.is_some();
-        let piece_type_char: Option<char> = event.piece.piece.get_type().into();
-        let piece_char = if let Some(c) = piece_type_char {
-            Some(c)
-        } else {
-            event.from.get_file_char()
-        };
 
-        let subject_piece_str = if let Some(c) = piece_char {
-            c.to_string()
-        } else {
-            "".to_string()
-        };
+        let piece_type_char: char = event.piece.piece.get_type().into();
+        let origin_square_str = String::try_from(event.from).unwrap_or("".to_string());
         let capture_str = if capture { "x" } else { "" };
         let target_square_str = String::try_from(event.to).unwrap_or("".to_string());
 
         format![
-            "{}{}{}",
-            subject_piece_str,
+            "{}{}{}{}",
+            piece_type_char,
+            origin_square_str,
             capture_str,
             target_square_str,
         ]

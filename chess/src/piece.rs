@@ -52,15 +52,15 @@ impl std::fmt::Display for PieceType {
 }
 
 // Piece-type characters for move logs
-impl From<PieceType> for Option<char> {
+impl From<PieceType> for char {
     fn from(piece: PieceType) -> Self {
         match piece {
-            PieceType::King => Some('K'),
-            PieceType::Queen => Some('Q'),
-            PieceType::Rook => Some('R'),
-            PieceType::Bishop => Some('B'),
-            PieceType::Knight => Some('N'),
-            PieceType::Pawn => None,
+            PieceType::King => 'K',
+            PieceType::Queen => 'Q',
+            PieceType::Rook => 'R',
+            PieceType::Bishop => 'B',
+            PieceType::Knight => 'N',
+            PieceType::Pawn => 'P',
         }
     }
 }
