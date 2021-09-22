@@ -25,36 +25,6 @@ use crate::{
 
 pub type PowerMap = HashMap<String, Vec<PieceType>>;
 
-fn print_map(map: PowerMap, color: Color, show_board_flipped: bool) -> String {
-    let mut grid = String::new();
-    for i in 0..8 {
-        for j in 0..8 {
-            // TODO TEST FOR MIRRORED
-            let position = Position { row: i, col: j };
-            let position = if show_board_flipped {
-                position.flip().unwrap()
-            } else {
-                position
-            };
-            let key = String::try_from(position).unwrap();
-            let powers = map.get(&key);
-            if let Some(powers) = powers {
-                for power in powers {
-                    let piece = Piece::new(color, *power);
-                    grid.push(char::from(&piece));
-                    grid.push(' ');
-                }
-                grid.push(',');
-            } else {
-                grid = grid + "  ,";
-            }
-        }
-        grid.push('\r');
-        grid.push('\n');
-    }
-    grid
-}
-
 const BISHOP_DIRECTIONS: [Position; 4] = [
     Position { row: 1, col: 1 },
     Position { row: -1, col: 1 },
@@ -340,7 +310,7 @@ impl Board {
         moves
     }
 
-    fn calculate_power_map(&self, color: Color) -> PowerMap {
+    pub fn calculate_power_map(&self, color: Color) -> PowerMap {
         let mut power_map = PowerMap::new();
 
         let mut push_targets = |piece_type: PieceType, targets: Vec<Position>| {

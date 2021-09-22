@@ -3,7 +3,6 @@ use wasm_bindgen::prelude::*;
 
 use psychess::{
     BoardPiece,
-    MoveEvent,
     Chess,
     Color,
     GameState,

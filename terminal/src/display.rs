@@ -1,4 +1,5 @@
-use psychess::{Position, PositionColor};
+use std::convert::{TryFrom};
+use psychess::{Color, Piece, PowerMap, Position, PositionColor};
 
 const VBAR: char = '|';
 const HBAR: char = '―';
@@ -62,4 +63,34 @@ pub fn get_board_character(x: i32, y: i32, highlights: Option<Vec<Position>>) ->
             }
         }
     }
+}
+
+pub fn print_power_map(map: PowerMap, color: Color, show_board_flipped: bool) -> String {
+    let mut grid = String::new();
+    for i in 0..8 {
+        for j in 0..8 {
+            // TODO TEST FOR MIRRORED
+            let position = Position { row: i, col: j };
+            let position = if show_board_flipped {
+                position.flip().unwrap()
+            } else {
+                position
+            };
+            let key = String::try_from(position).unwrap();
+            let powers = map.get(&key);
+            if let Some(powers) = powers {
+                for power in powers {
+                    let piece = Piece::new(color, *power);
+                    grid.push(char::from(&piece));
+                    grid.push(' ');
+                }
+                grid.push(',');
+            } else {
+                grid = grid + "  ,";
+            }
+        }
+        grid.push('\r');
+        grid.push('\n');
+    }
+    grid
 }

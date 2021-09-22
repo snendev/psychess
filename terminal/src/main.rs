@@ -17,7 +17,7 @@ use psychess::{
 
 mod display;
 
-use display::{get_board_character, get_position, MAX_PX, PX_PER_CELL};
+use display::{get_board_character, get_position, print_power_map, MAX_PX, PX_PER_CELL};
 
 
 const WELCOME_TEXT: &str = "Welcome! To start, enter one of the following keys:\r\n\
@@ -143,6 +143,13 @@ fn main() {
                 } else {
                     continue
                 }
+            }
+            Event::Key(Key::Char('p')) => {
+                print_power_map(
+                    game.0.get_board().calculate_power_map(player_color),
+                    player_color,
+                    player_color == Color::White,
+                );
             }
             _ => {
                 continue
