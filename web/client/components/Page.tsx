@@ -1,5 +1,7 @@
 import React from 'react'
 
+import GithubIcon from './GithubIcon.tsx'
+
 interface PageProps {
   children: React.ReactNode
 }
@@ -11,6 +13,9 @@ export default function Page({children}: PageProps): JSX.Element {
         <span className="header-text">
           Psy(chic) Chess
         </span>
+        <a href="https://github.com/sullivansean27/psychess" target="_blank">
+          <GithubIcon size={60} />
+        </a>
       </header>
       <main className="main">
         {children}

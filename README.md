@@ -53,7 +53,7 @@ The stack has a few key parts:
 - the terminal renderer, `/terminal`: a rust binary app for playing PsychicChess in terminal
     - not recently tested, might be buggy
 - the wasm build lib, `/wasm`: a wasm wrapper for engaging with core code in any wasm-friendly env
-    - `/scripts/build.sh` outputs this build into the appropriate directory in `/web`, and copy point elsewhere
+    - `/scripts/build.sh` outputs this build into the appropriate directory in `/web` and can copy it elsewhere.
 - the web application, `/web`: a deno/oak/react app using firebase
     - `/web/client`: defines react code for the client bundle
     - `/web/common`: utilities used in both server and browser code; wasm build target
