@@ -41,7 +41,9 @@ Pawns give "pawn powers" only when allied pieces are in their "attack" squares.
 If a piece has "pawn powers", it can either push forward one square or capture diagonally.
 En passent and double-move are not supported.
 
-The game is lost (and your opponent wins) if either your king is captured or you run out of moves (i.e. stalemate).
+### How To Win
+
+The game is won when you capture the enemy king or force the enemy into "stalemate" (i.e. they run out of moves).
 It is impossible to draw in PsychicChess.
 
 ### Origin
