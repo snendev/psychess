@@ -25,12 +25,21 @@ When a piece "sees" an ally, the ally can move with the properties of the suppor
 
 For example, consider the example below. The pawn on a2 is selected.
 
-![PsyChess board with a selection on the pawn on a2, "seen" by rook. The pawn can move between a3 and a7.](assets/readme/example1.png "Example 1")
+![PsyChess board with a selection on the pawn on a2, "seen" by rook. The pawn can move between a3 and a7.](assets/readme/example-rook.png "Example 1")
 
 In normal chess, the rook defends the a2 square.
 In PsychicChess, the pawn on a2 has "rook powers" and can move vertically and horizontally, even enabling the capture of the a7 pawn.
 
 We can think of this as the rook using psychic powers to help the pawn move!
+
+One confusing case is the pawn, which attacks differently from how it moves:
+
+![PsyChess board with a selection on the pawn on d4, supported by a pawn on e3. The d4 pawn can move to d5 or capture on e5.](assets/readme/example-pawn.png "Example 2")
+
+Pawns give "pawn powers" only when allied pieces are in their "attack" squares.
+(That is, "doubled" pawns do not support each other.)
+If a piece has "pawn powers", it can either push forward one square or capture diagonally.
+En passent and double-move are not supported.
 
 The game is lost (and your opponent wins) if either your king is captured or you run out of moves (i.e. stalemate).
 It is impossible to draw in PsychicChess.
