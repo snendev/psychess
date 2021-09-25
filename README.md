@@ -2,6 +2,14 @@
 
 **Warning**: This application is in alpha, and the code is both largely undocumented and minimally tested. Peruse at your own peril.
 
+### Known Bugs
+
+Currently, whenever a capture occurs, the capturing piece disappears from the board.
+This is a visual bug that can be safely ignored -- your piece is safe and alive on the capture square!
+It's an issue with a dependency -- for ease of implementation, PsychicChess uses [`chessboardjsx`](https://github.com/willb335/chessboardjsx), an unmaintained project, to render chessboards.
+Controlled usage of the component seems to be unsupported as it results in this behavior.
+(No disrespect to those authors, of course.)
+
 ## About
 
 ### Game Rules
@@ -66,12 +74,3 @@ The stack has a few key parts:
 ## Next Steps
 
 I'm not going to work on this for a little bit but updates should come soon :)
-
-## Known Bugs
-
-Currently, whenever a capture occurs, the capturing piece disappears from the board.
-This is a visual bug that can be safely ignored -- your piece is safe!
-This is a dependency issue:
-For ease of implementation, PsychicChess uses [`chessboardjsx`](https://github.com/willb335/chessboardjsx), an unmaintained project, to render chessboards.
-Controlled usage of the component seems to be unsupported as it results in this behavior.
-(No disrespect to those authors, of course.)
