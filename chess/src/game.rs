@@ -72,10 +72,7 @@ impl From<MoveEvent> for String {
 
         format!(
             "{}{}{}{}",
-            piece_type_char,
-            origin_square_str,
-            capture_str,
-            target_square_str,
+            piece_type_char, origin_square_str, capture_str, target_square_str,
         )
     }
 }
@@ -147,7 +144,8 @@ impl GameState {
     }
 
     fn is_stalemate(&self) -> bool {
-        !self.board
+        !self
+            .board
             .get_pieces_of_color(self.get_turn_color())
             .into_iter()
             .any(|piece| !self.board.get_valid_targets(&piece).is_empty())

@@ -6,7 +6,7 @@ use crate::{
         self, Color, Piece,
         PieceType::{self, Bishop, King, Knight, Pawn, Queen, Rook},
     },
-    position::{Position, squares},
+    position::{squares, Position},
 };
 
 // enum BoardResult {
@@ -69,19 +69,16 @@ pub struct Board {
 impl Board {
     pub fn new(pieces: Vec<BoardPiece>) -> Self {
         Board {
-            squares: pieces
-                .clone()
-                .iter()
-                .map(|p| (*p, p.origin))
-                .collect(),
+            squares: pieces.clone().iter().map(|p| (*p, p.origin)).collect(),
             pieces,
         }
     }
 
     pub fn get_piece_at_position(&self, square: Position) -> Option<BoardPiece> {
-        self.pieces.clone().into_iter().find(|piece| {
-            *self.squares.get(piece).unwrap_or(&squares::ZERO) == square
-        })
+        self.pieces
+            .clone()
+            .into_iter()
+            .find(|piece| *self.squares.get(piece).unwrap_or(&squares::ZERO) == square)
     }
 
     pub fn get_pieces_of_color(&self, color: Color) -> Vec<BoardPiece> {
@@ -202,7 +199,7 @@ impl Board {
     fn is_capture_square(&self, square: Position, color: Color) -> bool {
         self.pieces.clone().into_iter().any(|piece| {
             if piece.piece.is_ally(color) {
-                return false
+                return false;
             }
             self.get_piece_position(&piece).unwrap() == square
         })

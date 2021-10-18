@@ -1,24 +1,20 @@
+use psychess::{
+    pieces::{BLACK_KING, WHITE_KING},
+    Chess, Color, GameState, Position,
+};
+use rand::distributions::{Distribution, Uniform};
 use std::convert::TryFrom;
 use std::io::{stdin, stdout, Write};
-use rand::distributions::{Distribution, Uniform};
 use termion::{
     event::{Event, Key, MouseEvent},
     input::{MouseTerminal, TermRead},
-    raw::{IntoRawMode},
+    raw::IntoRawMode,
     screen::*,
-};
-use psychess::{
-    Chess,
-    GameState,
-    Color,
-    Position,
-    pieces::{WHITE_KING, BLACK_KING},
 };
 
 mod display;
 
 use display::{get_board_character, get_position, print_power_map, MAX_PX, PX_PER_CELL};
-
 
 const WELCOME_TEXT: &str = "Welcome! To start, enter one of the following keys:\r\n\
 1 - Play as the White pieces\r\n\
@@ -35,7 +31,8 @@ fn input_player_color(out: &mut impl Write) -> Option<Color> {
         termion::cursor::Goto(1, 1),
         WELCOME_TEXT,
         termion::cursor::Hide,
-    ).unwrap();
+    )
+    .unwrap();
 
     let mut player_color: Option<Color> = None;
 
@@ -107,15 +104,11 @@ fn render_board(out: &mut impl Write, game_state: &TerminalClient, player_color:
 }
 
 fn main() {
-    let mut out = AlternateScreen::from(
-        MouseTerminal::from(
-            stdout().into_raw_mode().unwrap()
-        )
-    );
+    let mut out = AlternateScreen::from(MouseTerminal::from(stdout().into_raw_mode().unwrap()));
 
     let player_color = input_player_color(&mut out);
     if player_color.is_none() {
-        return
+        return;
     }
     let player_color = player_color.unwrap();
     let show_board_flipped = player_color != Color::White;
@@ -147,12 +140,10 @@ fn main() {
                     player_color == Color::White,
                 );
             }
-            _ => {
-                continue
-            }
+            _ => continue,
         }
         render_board(&mut out, &game, player_color);
-        
+
         let game_result = game.0.get_game_result();
         eprintln!("[main]: {:?}", game_result);
         if let Some(result) = game_result {
@@ -163,14 +154,16 @@ fn main() {
                     winner,
                     result.reason,
                     termion::cursor::Hide,
-                ).unwrap();
+                )
+                .unwrap();
             } else {
                 write!(
                     out,
                     "\r\n\r\nDraw by {}!{}",
                     result.reason,
                     termion::cursor::Hide,
-                ).unwrap();
+                )
+                .unwrap();
             }
             out.flush().unwrap();
         } else {

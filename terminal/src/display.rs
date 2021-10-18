@@ -1,5 +1,5 @@
-use std::convert::{TryFrom};
-use psychess::{Color, Piece, PowerMap, Position, PositionColor};
+use psychess::{Color, Piece, Position, PositionColor, PowerMap};
+use std::convert::TryFrom;
 
 const VBAR: char = '|';
 const HBAR: char = '―';

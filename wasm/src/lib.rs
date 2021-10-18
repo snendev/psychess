@@ -1,16 +1,7 @@
 use std::convert::{From, TryFrom};
 use wasm_bindgen::prelude::*;
 
-use psychess::{
-    BoardPiece,
-    Chess,
-    Color,
-    GameState,
-    Piece,
-    PieceType,
-    Position,
-    Turn,
-};
+use psychess::{BoardPiece, Chess, Color, GameState, Piece, PieceType, Position, Turn};
 
 // Code to enable using log("") fn that yields console.log() statements
 //
