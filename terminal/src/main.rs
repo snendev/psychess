@@ -118,7 +118,7 @@ fn main() {
         return
     }
     let player_color = player_color.unwrap();
-    let show_board_flipped = if player_color == Color::White { false } else { true };
+    let show_board_flipped = player_color != Color::White;
     let mut game = TerminalClient(GameState::default(), None);
 
     let stdin = stdin();
@@ -131,18 +131,14 @@ fn main() {
         let event = keypress.unwrap();
         match event {
             Event::Key(Key::Char('q')) => return,
-            Event::Mouse(mouse_event) => {
-                if let MouseEvent::Press(_, x, y) = mouse_event {
-                    let click_position = get_position(i32::from(x), i32::from(y));
-                    let click_position = if show_board_flipped {
-                        click_position.map(|position| position.flip().unwrap())
-                    } else {
-                        click_position
-                    };
-                    game.1 = click_position;
+            Event::Mouse(MouseEvent::Press(_, x, y)) => {
+                let click_position = get_position(i32::from(x), i32::from(y));
+                let click_position = if show_board_flipped {
+                    click_position.map(|position| position.flip().unwrap())
                 } else {
-                    continue
-                }
+                    click_position
+                };
+                game.1 = click_position;
             }
             Event::Key(Key::Char('p')) => {
                 print_power_map(

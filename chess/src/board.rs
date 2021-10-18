@@ -55,7 +55,7 @@ impl BoardPiece {
 
 impl std::fmt::Display for BoardPiece {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let target = String::try_from(self.origin).unwrap_or("?".to_string());
+        let target = String::try_from(self.origin).unwrap_or_else(|_| "?".to_string());
         write!(f, "{}({})", char::from(&self.piece), target)
     }
 }
@@ -79,16 +79,9 @@ impl Board {
     }
 
     pub fn get_piece_at_position(&self, square: Position) -> Option<BoardPiece> {
-        let collider =
-            self.pieces.clone().into_iter().find(|piece| {
-                *self.squares.get(&piece).unwrap_or(&squares::ZERO) == square
-            });
-
-        if let Some(piece) = collider {
-            Some(piece)
-        } else {
-            None
-        }
+        self.pieces.clone().into_iter().find(|piece| {
+            *self.squares.get(piece).unwrap_or(&squares::ZERO) == square
+        })
     }
 
     pub fn get_pieces_of_color(&self, color: Color) -> Vec<BoardPiece> {
@@ -106,7 +99,7 @@ impl Board {
         // yield moves for each Pos1,Pos2 tuple
         let origin = self.get_piece_position(piece).unwrap();
         let color = piece.piece.get_color();
-        let position_key = String::try_from(origin).unwrap_or("".to_string());
+        let position_key = String::try_from(origin).unwrap_or_else(|_| "".to_string());
 
         let powers = self.calculate_power_map(color);
         let piece_powers = powers.get(position_key.as_str());
@@ -165,7 +158,7 @@ impl Board {
                 .pieces
                 .iter()
                 .position(|p| self.get_piece_position(p).unwrap() == target);
-            self.squares.remove(&captured_piece);
+            self.squares.remove(captured_piece);
             if let Some(i) = captured_index {
                 self.pieces.remove(i);
             }
@@ -191,10 +184,7 @@ impl Board {
     }
 
     fn get_piece_position(&self, piece: &BoardPiece) -> Option<Position> {
-        match self.squares.get(&piece) {
-            Some(position) => Some(*position),
-            None => None,
-        }
+        self.squares.get(piece).copied()
     }
 
     fn is_available_square(&self, square: Position, color: Option<Color>) -> bool {

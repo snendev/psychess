@@ -115,7 +115,7 @@ pub fn get_piece_index_from_character(value: char) -> i32 {
 #[wasm_bindgen]
 pub fn create_board(pieces_and_positions: &[i32], is_white_turn: bool) -> WasmClient {
     // input is actually (piece, position) tuples
-    let pieces: Vec<&i32> = pieces_and_positions.clone().iter().step_by(2).collect();
+    let pieces: Vec<&i32> = pieces_and_positions.iter().step_by(2).collect();
     let positions: Vec<&i32> = pieces_and_positions.iter().skip(1).step_by(2).collect();
 
     let color = if is_white_turn {
@@ -139,6 +139,8 @@ pub fn create_board(pieces_and_positions: &[i32], is_white_turn: bool) -> WasmCl
 
 #[wasm_bindgen]
 impl WasmClient {
+    // Exposes a constructor to JavaScript
+    #[allow(clippy::new_without_default)]
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         WasmClient(GameState::default())

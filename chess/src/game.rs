@@ -66,17 +66,17 @@ impl From<MoveEvent> for String {
         let capture: bool = event.capture.is_some();
 
         let piece_type_char: char = event.piece.piece.get_type().into();
-        let origin_square_str = String::try_from(event.from).unwrap_or("".to_string());
+        let origin_square_str = String::try_from(event.from).unwrap_or_else(|_| "".to_string());
         let capture_str = if capture { "x" } else { "" };
-        let target_square_str = String::try_from(event.to).unwrap_or("".to_string());
+        let target_square_str = String::try_from(event.to).unwrap_or_else(|_| "".to_string());
 
-        format![
+        format!(
             "{}{}{}{}",
             piece_type_char,
             origin_square_str,
             capture_str,
             target_square_str,
-        ]
+        )
     }
 }
 
@@ -147,15 +147,10 @@ impl GameState {
     }
 
     fn is_stalemate(&self) -> bool {
-        let current_turn_pieces = self.board.get_pieces_of_color(self.get_turn_color());
-        let can_move = current_turn_pieces
-            .clone()
+        !self.board
+            .get_pieces_of_color(self.get_turn_color())
             .into_iter()
-            .filter(|piece| self.board.get_valid_targets(piece).len() != 0)
-            .collect::<Vec<BoardPiece>>()
-            .len()
-            != 0;
-        !can_move
+            .any(|piece| !self.board.get_valid_targets(&piece).is_empty())
     }
 }
 
@@ -175,10 +170,10 @@ impl Chess for GameState {
 
     fn get_game_result(&self) -> Option<GameResult> {
         if let Some(loser) = self.get_captured_king_color() {
-            return Some(GameResult {
+            Some(GameResult {
                 winner: Some(!loser),
                 reason: GameCompletionReason::KingCapture,
-            });
+            })
         } else if self.is_stalemate() {
             Some(GameResult {
                 winner: Some(!self.get_turn_color()),
@@ -225,7 +220,7 @@ impl Chess for GameState {
         eprintln!(
             "[commit_move]: {} -> {}",
             moving_piece,
-            String::try_from(target).unwrap_or("?".to_string()),
+            String::try_from(target).unwrap_or_else(|_| "?".to_string()),
         );
 
         let valid_moves = self.board.get_valid_targets(&moving_piece);
