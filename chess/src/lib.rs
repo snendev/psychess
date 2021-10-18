@@ -4,9 +4,9 @@ mod piece;
 mod position;
 
 pub use board::{BoardPiece, PowerMap};
-pub use game::{MoveEvent, Chess, GameState, Turn};
+pub use game::{Chess, GameState, MoveEvent, Turn};
 pub use piece::{Color, Piece, PieceType};
-pub use position::{Position, PositionColor, squares};
+pub use position::{squares, Position, PositionColor};
 
 pub mod pieces {
     pub use crate::piece::{

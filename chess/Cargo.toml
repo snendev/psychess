@@ -1,6 +1,6 @@
 [package]
 name = "psychess"
 version = "0.1.0"
-authors = ["snen <seansullygames@gmail.com>"]
+authors = ["snen <sullivansean27@gmail.com>"]
 edition = "2018"
 keywords = ["chess", "chess variant", "gamedev", "windows", "deno", "react"]

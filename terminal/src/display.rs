@@ -1,5 +1,5 @@
-use std::convert::{TryFrom};
-use psychess::{Color, Piece, PowerMap, Position, PositionColor};
+use psychess::{Color, Piece, Position, PositionColor, PowerMap};
+use std::convert::TryFrom;
 
 const VBAR: char = '|';
 const HBAR: char = '―';
@@ -18,7 +18,7 @@ pub const MAX_PX: i32 = PX_PER_CELL * 8 + BORDER_SIZE;
 
 fn get_col(x: i32) -> Option<i32> {
     let value = (x - BORDER_SIZE) / PX_PER_CELL;
-    if value < 0 || value > 7 {
+    if !(0..=7).contains(&value) {
         None
     } else {
         Some(value)
@@ -39,7 +39,7 @@ pub fn get_position(x: i32, y: i32) -> Option<Position> {
 }
 
 pub fn get_board_character(x: i32, y: i32, highlights: Option<Vec<Position>>) -> Option<char> {
-    let highlights: Vec<Position> = highlights.unwrap_or(Vec::new());
+    let highlights: Vec<Position> = highlights.unwrap_or_default();
 
     let inner_cell_y = y % PX_PER_CELL;
     let inner_cell_x = x % PX_PER_CELL;
@@ -86,7 +86,7 @@ pub fn print_power_map(map: PowerMap, color: Color, show_board_flipped: bool) ->
                 }
                 grid.push(',');
             } else {
-                grid = grid + "  ,";
+                grid += "  ,";
             }
         }
         grid.push('\r');

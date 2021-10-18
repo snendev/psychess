@@ -283,7 +283,7 @@ impl TryFrom<String> for Position {
             Some('g') => Ok(6),
             Some('h') => Ok(7),
             Some(x) => Err(format!("invalid column character `{}`", x)),
-            None => Err(format!("incorrect format")),
+            None => Err("incorrect format".to_string()),
         }?;
 
         let rank = characters.next().unwrap_or('0').to_string().parse::<i32>();

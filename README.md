@@ -2,6 +2,14 @@
 
 **Warning**: This application is in alpha, and the code is both largely undocumented and minimally tested. Peruse at your own peril.
 
+### Known Bugs
+
+Currently, whenever a capture occurs, the capturing piece disappears from the board.
+This is a visual bug that can be safely ignored -- your piece is safe and alive on the capture square!
+It's an issue with a dependency -- for ease of implementation, PsychicChess uses [`chessboardjsx`](https://github.com/willb335/chessboardjsx), an unmaintained project, to render chessboards.
+Controlled usage of the component seems to be unsupported as it results in this behavior.
+(No disrespect to those authors, of course.)
+
 ## About
 
 ### Game Rules
@@ -17,14 +25,25 @@ When a piece "sees" an ally, the ally can move with the properties of the suppor
 
 For example, consider the example below. The pawn on a2 is selected.
 
-![PsyChess board with a selection on the pawn on a2, "seen" by rook. The pawn can move between a3 and a7.](assets/readme/example1.png "Example 1")
+![PsyChess board with a selection on the pawn on a2, "seen" by rook. The pawn can move between a3 and a7.](assets/readme/example-rook.png "Example 1")
 
 In normal chess, the rook defends the a2 square.
 In PsychicChess, the pawn on a2 has "rook powers" and can move vertically and horizontally, even enabling the capture of the a7 pawn.
 
 We can think of this as the rook using psychic powers to help the pawn move!
 
-The game is lost (and your opponent wins) if either your king is captured or you run out of moves (i.e. stalemate).
+One confusing case is the pawn, which attacks differently from how it moves:
+
+![PsyChess board with a selection on the pawn on d4, supported by a pawn on e3. The d4 pawn can move to d5 or capture on e5.](assets/readme/example-pawn.png "Example 2")
+
+Pawns give "pawn powers" only when allied pieces are in their "attack" squares.
+(That is, "doubled" pawns do not support each other.)
+If a piece has "pawn powers", it can either push forward one square or capture diagonally.
+En passent and double-move are not supported.
+
+### How To Win
+
+The game is won when you capture the enemy king or force the enemy into "stalemate" (i.e. they run out of moves).
 It is impossible to draw in PsychicChess.
 
 ### Origin
