@@ -13,7 +13,7 @@ export default function Page({children}: PageProps): JSX.Element {
         <span className="header-text">
           Psy(chic) Chess
         </span>
-        <a href="https://github.com/sullivansean27/psychess" target="_blank">
+        <a href="https://github.com/snendev/psychess" target="_blank">
           <GithubIcon size={60} />
         </a>
       </header>
