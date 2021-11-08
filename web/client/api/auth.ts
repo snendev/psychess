@@ -1,7 +1,14 @@
-import firebase from 'firebase'
-import 'firebase/auth'
+import {initializeApp} from 'firebase/app'
+import {
+  getAuth,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from 'firebase/auth'
 
-const app = firebase.initializeApp({
+const app = initializeApp({
   apiKey: "AIzaSyDlfT3HNpetwqcvbEMy_INU-O8NNjOjX0Y",
   authDomain: "psychess-e2fe8.firebaseapp.com",
   projectId: "psychess-e2fe8",
@@ -10,11 +17,11 @@ const app = firebase.initializeApp({
   appId: "1:553909107236:web:1908f0acc30fdb6e00f6b1"
 })
 
-const auth = app.auth()
+const auth = getAuth(app)
 
 // auto-login
 export function subscribeToAuthState(handleUser: (user: {uid: string; displayName: string} | null) => void) {
-  return auth.onAuthStateChanged(handleUser)
+  return onAuthStateChanged(auth, handleUser)
 }
 
 ///
@@ -22,11 +29,11 @@ export function subscribeToAuthState(handleUser: (user: {uid: string; displayNam
 ///
 
 export async function registerBasic(email: string, password: string) {
-  const user = await auth.createUserWithEmailAndPassword(email, password)
+  const user = await createUserWithEmailAndPassword(auth, email, password)
 }
 
 export async function loginBasic(email: string, password: string): Promise<string | null> {
-  const credentials = await auth.signInWithEmailAndPassword(email, password)
+  const credentials = await signInWithEmailAndPassword(auth, email, password)
   return credentials.user?.uid ?? null
 }
 
@@ -36,7 +43,7 @@ export async function loginBasic(email: string, password: string): Promise<strin
 
 export async function loginGoogle(): Promise<string> {
   // @ts-ignore deno does not recognize firebase.auth the way it is imported, but it exists
-  const provider = new firebase.auth.GoogleAuthProvider();
-  const {accessToken, credential, user} = await auth.signInWithPopup(provider)
+  const provider = new GoogleAuthProvider();
+  const {accessToken, credential, user} = await signInWithPopup(auth, provider)
   return user.uid
 }
