@@ -2,7 +2,7 @@
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext", "deno.ns", "deno.unstable"],
     "allowJs": true,
-    "jsxFactory": "react",
+    "jsx": "react",
     "strictPropertyInitialization": false,
   }
 }
