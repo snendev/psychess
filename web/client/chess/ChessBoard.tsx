@@ -100,12 +100,18 @@ export default function Board(
     [myColor, boardIsInverted]
   )
 
+  const pieceHash = React.useMemo(
+    () => Object.entries(pieces).flatMap((piece) => piece).join('-'),
+    [pieces],
+  )
+
   // TODO: when receiving a new board state reflecting a capture from the previous state,
   // ChessboardJSX seems to be deleting the key for the captured square, which is where
   // the moved piece is now located.
 
   return (
     <ChessBoard
+      key={pieceHash}
       allowDrag={allowDrag}
       dropOffBoard="snapback"
       id="play"

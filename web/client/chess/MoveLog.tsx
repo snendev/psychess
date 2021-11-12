@@ -13,8 +13,9 @@ export default function MoveLog({moves}: MoveLogProps): JSX.Element {
   }, [])
   return (
     <table className="move-log">
-      {rows.map(([left, right]) => (
+      {rows.map(([left, right], index) => (
         <tr>
+          <td width={20}>{index + 1}.</td>
           <td>{left}</td>
           <td>{right}</td>
         </tr>
