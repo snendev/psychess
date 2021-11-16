@@ -39,6 +39,13 @@ const PIECES: Piece[] = [
   BLACK_PAWN_CHAR,
 ]
 
+function buildPuzzleLink(pieces: Record<Square, PieceCode>, turn: Color) {
+  const piecesString = Object.entries(pieces)
+    .map(([square, piece]) => `${piece}-${square}`)
+    .join('_')
+  return `${window.location.host}?turn=${turn}&pieces=${piecesString}`
+}
+
 export default function GameEditor(): JSX.Element {
   const [pieces, setPieces] = React.useState<Record<Square, PieceCode>>({})
   const [boardIsInverted, setBoardIsInverted] = React.useState(false)
@@ -68,6 +75,7 @@ export default function GameEditor(): JSX.Element {
   return (
     <div>
       <div>
+        <span>{colorToMove} to move</span>
         <ChessBoard
           key="local"
           pieces={pieces}
@@ -87,8 +95,11 @@ export default function GameEditor(): JSX.Element {
           ))}
           {selectedNewPiece}
         </div>
-        <button onClick={toggleColorToMove}>Change Turn</button>
-        <button onClick={toggleBoardIsInverted}>Flip Board</button>
+        <div>
+          <button onClick={toggleColorToMove}>Change Turn</button>
+          <button onClick={toggleBoardIsInverted}>Flip Board</button>
+        </div>
+        <a href={buildPuzzleLink(pieces, colorToMove)}>Play this position</a>
       </div>
     </div>
   )
