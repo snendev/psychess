@@ -30,7 +30,7 @@ function GameFrame() {
       setMode('analyze')
       setInitialPosition({pieces, turn: turn as Color})
     } else {
-      window.location.replace(window.location.host)
+      window.location.replace('/')
     }
   }, [])
 
