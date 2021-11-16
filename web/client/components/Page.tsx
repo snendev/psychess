@@ -11,7 +11,9 @@ export default function Page({children}: PageProps): JSX.Element {
     <div className="page">
       <header className="header">
         <span className="header-text">
-          Psychic Chess
+          <a href="/">
+            Psychic Chess
+          </a>
         </span>
         <a href="https://github.com/snendev/psychess" target="_blank">
           <GithubIcon size={60} />
