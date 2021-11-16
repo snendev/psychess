@@ -43,7 +43,7 @@ function buildPuzzleLink(pieces: Record<Square, PieceCode>, turn: Color) {
   const piecesString = Object.entries(pieces)
     .map(([square, piece]) => `${piece}-${square}`)
     .join('_')
-  return `${window.location.host}?turn=${turn}&pieces=${piecesString}`
+  return `${window.location.origin}?turn=${turn}&pieces=${piecesString}`
 }
 
 export default function GameEditor(): JSX.Element {
