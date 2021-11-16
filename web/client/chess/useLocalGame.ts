@@ -58,13 +58,13 @@ export default function useLocalGame(initialPosition: Board | null): LocalGame {
     )
     if (!ok) return
     const currentTurn = getTurn(gameInstance)
-    setState({
+    setState(({myColor: prevMyColor}) => ({
       lastMove: [origin, target],
       moveLog: gameInstance.get_move_history(),
       pieces: renderPieces(gameInstance),
-      myColor: currentTurn,
+      myColor: prevMyColor,
       turn: currentTurn,
-    })
+    }))
   }, [pieces, turn])
 
   const getValidTargets = React.useCallback((position: Position) => {
