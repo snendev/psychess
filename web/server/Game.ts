@@ -61,6 +61,7 @@ export default class Game {
         lastMove: ok ? [json.origin, json.target] : null,
         turn,
         pieces: pieces,
+        moveLog: this._instance.get_move_history(),
       });
     }
     if (json.type === 'get-valid-targets') {
