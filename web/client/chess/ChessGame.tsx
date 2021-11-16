@@ -26,7 +26,6 @@ export default function ChessGame(props: ChessGameProps): JSX.Element {
       </div>
       <div className="board-menu">
         <MoveLog moves={props.moveLog} />
-        {/* <button onClick={props.undoMove}>{UNDO_CHAR}</button> */}
       </div>
     </div>
   )
