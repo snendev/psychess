@@ -99,7 +99,9 @@ export default function GameEditor(): JSX.Element {
           <button onClick={toggleColorToMove}>Change Turn</button>
           <button onClick={toggleBoardIsInverted}>Flip Board</button>
         </div>
-        <a href={buildPuzzleLink(pieces, colorToMove)}>Play this position</a>
+        <a href={buildPuzzleLink(pieces, colorToMove)} target="_blank">
+          Play this position
+        </a>
       </div>
     </div>
   )

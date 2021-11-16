@@ -1,10 +1,16 @@
 import React from 'react'
 
+import {Board} from '~/common/chess/board.ts'
+
 import ChessGame from './ChessGame.tsx'
 import useLocalGame from './useLocalGame.ts'
 
-export default function LocalGame(): JSX.Element {
-  const game = useLocalGame()
+interface LocalGameProps {
+  initialPosition: Board | null
+}
+
+export default function LocalGame({initialPosition}: LocalGameProps): JSX.Element {
+  const game = useLocalGame(initialPosition)
 
   return (
     <div>
@@ -13,7 +19,7 @@ export default function LocalGame(): JSX.Element {
         pieces={game.pieces}
         lastMove={game.lastMove}
         moveLog={game.moveLog}
-        myColor="white"
+        myColor={game.myColor}
         opponentName=""
         turn={game.turn}
         getValidTargets={game.getValidTargets}

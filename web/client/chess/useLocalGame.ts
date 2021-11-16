@@ -1,8 +1,8 @@
 import React from 'react'
 
-import {Position, getPositionIndex} from '~/common/chess/board.ts'
+import {Board, Position, getPositionIndex, getSquare} from '~/common/chess/board.ts'
 import {createBoard, getMoves, getTurn, renderPieces} from '~/common/chess/wasm_utils.ts'
-import { WasmClient } from '~/common/wasm/wasm_chess.js'
+import {WasmClient} from '~/common/wasm/wasm_chess.js'
 
 import type {GameActions, GameState} from './types.ts'
 
@@ -17,30 +17,40 @@ const initialState: LocalGameState = {
   turn: 'white',
 }
 
-export default function useLocalGame(): LocalGame {
-  const [state, setState] = React.useState(initialState)
-
+export default function useLocalGame(initialPosition: Board | null): LocalGame {
+  const [state, setState] = React.useState(initialPosition ? {
+    ...initialState,
+    ...initialPosition,
+    myColor: initialPosition.turn,
+  } : initialState)
   const {pieces, lastMove, moveLog, myColor, turn} = state
 
   const gameInstanceRef = React.useRef<WasmClient>()
 
   // initialize game instance
   React.useEffect(() => {
-    const board = createBoard(null)
-    gameInstanceRef.current = board
-    setState({
-      pieces: renderPieces(board),
-      turn: getTurn(board),
-      moveLog: board.get_move_history(),
-      myColor: 'white',
-      lastMove: null,
-    })
-  }, [])
+    if (initialPosition === null || Object.entries(initialPosition).length === 0) {
+      const board = createBoard(null)
+      gameInstanceRef.current = board
+      setState({
+        pieces: renderPieces(board),
+        turn: getTurn(board),
+        moveLog: board.get_move_history(),
+        myColor: 'white',
+        lastMove: null,
+      })
+    } else {
+      const board = createBoard(initialPosition)
+      gameInstanceRef.current = board
+    }
+  }, [initialPosition])
 
   const movePiece = React.useCallback((origin: Position, target: Position): void => {
     const {current: gameInstance} = gameInstanceRef
     if (!gameInstance) return
-    if (getTurn(gameInstance) !== turn) return
+    const targetPieceCode = pieces[getSquare(origin)]
+    const color = targetPieceCode.charAt(0) === 'w' ? 'white' : 'black'
+    if (turn !== color) return
 
     const ok = gameInstance.move_piece(
       getPositionIndex(origin),
@@ -55,7 +65,7 @@ export default function useLocalGame(): LocalGame {
       myColor: currentTurn,
       turn: currentTurn,
     })
-  }, [turn])
+  }, [pieces, turn])
 
   const getValidTargets = React.useCallback((position: Position) => {
     const {current: gameInstance} = gameInstanceRef
