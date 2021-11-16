@@ -1,17 +1,10 @@
 import React from 'react'
 import ChessBoard from 'chessboardjsx'
 
-import {Board, Square, getSquare, getPositionFromSquare} from '~/common/chess/board.ts'
-import {Color, PieceCode} from '~/common/chess/pieces.ts'
+import {Board, Square, getSquare, getPositionFromSquare, determineOrientation} from '~/common/chess/board.ts'
+import {PieceCode} from '~/common/chess/pieces.ts'
 
 import {Game} from './types.ts'
-
-function determineOrientation(myColor: Color, invert: boolean): Color {
-  const isWhite = myColor === 'white'
-  return (isWhite && !invert) || (!isWhite && invert)
-    ? 'white'
-    : 'black'
-}
 
 interface BoardProps extends Game {
   boardIsInverted: boolean

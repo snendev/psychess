@@ -56,3 +56,10 @@ export function getPositionFromSquare(square: string): Position {
   const row = +square.charAt(1) - 1
   return { row, col }
 }
+
+export function determineOrientation(myColor: Color, invert: boolean): Color {
+  const isWhite = myColor === 'white'
+  return (isWhite && !invert) || (!isWhite && invert)
+    ? 'white'
+    : 'black'
+}
