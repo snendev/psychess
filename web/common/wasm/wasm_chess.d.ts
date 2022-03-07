@@ -56,7 +56,6 @@ export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly __wbg_wasmclient_free: (a: number) => void;
   readonly get_piece_from_i32: (a: number, b: number) => void;
-  readonly get_piece_index_from_character: (a: number) => number;
   readonly create_board: (a: number, b: number, c: number) => number;
   readonly wasmclient_new: () => number;
   readonly wasmclient_move_piece: (a: number, b: number, c: number) => number;
@@ -64,6 +63,7 @@ export interface InitOutput {
   readonly wasmclient_is_white_turn: (a: number) => number;
   readonly wasmclient_render_board: (a: number, b: number) => void;
   readonly wasmclient_get_move_history: (a: number, b: number) => void;
+  readonly get_piece_index_from_character: (a: number) => number;
   readonly __wbindgen_free: (a: number, b: number) => void;
   readonly __wbindgen_malloc: (a: number) => number;
 }
