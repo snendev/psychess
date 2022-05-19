@@ -40,10 +40,11 @@ It is impossible to draw in PsychicChess.
 
 ### Origin
 
-The original idea for this was made by someone I used to work with named Bojan.
+I found this game through someone I used to work with named Bojan.
 (It's original name was "Bojanchess".)
 I have adapted it slightly for ease of implementation (and to my own liking).
 Thanks Bojan!
+Supposedly, it has origins from [Knight Relay Chess](https://en.wikipedia.org/wiki/Knight_relay_chess), but the history is unclear.
 
 ## Application
 
